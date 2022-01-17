@@ -1,5 +1,5 @@
 import { V0alpha2Api } from '@ory/kratos-client';
-import { axios } from '@/services/api';
+import axios from '@/services/axios.service';
 
 export const AuthUrl = 'http://kratos.jchat.alanwgt.com';
 

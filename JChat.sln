@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JChat.Application", "JChat.Application\JChat.Application.csproj", "{FFEA18EA-F37A-4151-AE29-C0F9250B1105}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JChat.Infrastructure", "JChat.Infrastructure\JChat.Infrastructure.csproj", "{2A475E63-3841-450A-8BFC-31F019F84D45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JChat.Domain", "JChat.Domain\JChat.Domain.csproj", "{769D7728-994A-4D81-938C-03AFF4EE154D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JChat.WebUI", "JChat.WebUI\JChat.WebUI.csproj", "{4608DF46-D366-4FFE-AE08-BECE2F61B8BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFEA18EA-F37A-4151-AE29-C0F9250B1105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFEA18EA-F37A-4151-AE29-C0F9250B1105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFEA18EA-F37A-4151-AE29-C0F9250B1105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFEA18EA-F37A-4151-AE29-C0F9250B1105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A475E63-3841-450A-8BFC-31F019F84D45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A475E63-3841-450A-8BFC-31F019F84D45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A475E63-3841-450A-8BFC-31F019F84D45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A475E63-3841-450A-8BFC-31F019F84D45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769D7728-994A-4D81-938C-03AFF4EE154D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769D7728-994A-4D81-938C-03AFF4EE154D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769D7728-994A-4D81-938C-03AFF4EE154D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769D7728-994A-4D81-938C-03AFF4EE154D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4608DF46-D366-4FFE-AE08-BECE2F61B8BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4608DF46-D366-4FFE-AE08-BECE2F61B8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4608DF46-D366-4FFE-AE08-BECE2F61B8BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4608DF46-D366-4FFE-AE08-BECE2F61B8BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

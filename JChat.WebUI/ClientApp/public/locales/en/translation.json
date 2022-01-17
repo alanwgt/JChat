@@ -1,0 +1,23 @@
+{
+  "auth.account_registered": "Account registered!",
+  "auth.checking": "Validating session",
+  "auth.description": "The authentication is required to access anything inside the platform",
+  "auth.header.choose": "JChat Auth",
+  "auth.login": "Sign-in",
+  "auth.logout": "Logout",
+  "auth.register": "Sign-up",
+  "button.close": "",
+  "error.unknown": "",
+  "explorer.channels": "Channels",
+  "explorer.direct": "Direct messages",
+  "global-search-placeholder": "Search everywhere",
+  "kratos.password": "Password",
+  "kratos.password_identifier": "Username",
+  "kratos.traits.name.first": "First name",
+  "kratos.traits.name.last": "Second name",
+  "kratos.traits.username": "Username",
+  "user.settings.header": "",
+  "workspace.change": "Change workspace",
+  "workspace.selector.description": "Workspaces...",
+  "workspace.selector.title": "Select a workspace"
+}

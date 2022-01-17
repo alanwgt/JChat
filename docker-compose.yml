@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: "postgres:${POSTGRES_VERSION}"
+    env_file: ["./.env"]
+    volumes:
+      - ./docker/multiple-databases:/docker-entrypoint-initdb.d
+      - type: volume
+        source: pgdata
+        target: /var/lib/postgresql/data
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: "${ORY_KRATOS_DATABASE},${API_DATABASE},${ORY_KETO_DATABASE}"
+    networks: ["intranet"]
+
+  kratos-migrate:
+    image: "oryd/kratos:${ORY_KRATOS_VERSION}"
+    depends_on: ["postgres"]
+    env_file: ["./.env"]
+    volumes:
+      - type: bind
+        source: ./JChat.Infrastructure/Files/kratos
+        target: /etc/config/kratos
+    command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
+    restart: on-failure
+    networks: ["intranet"]
+
+  kratos:
+    image: "oryd/kratos:${ORY_KRATOS_VERSION}"
+    depends_on: ["kratos-migrate"]
+    env_file: ["./.env"]
+    restart: unless-stopped
+    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+    volumes:
+      - type: bind
+        source: ./JChat.Infrastructure/Files/kratos
+        target: /etc/config/kratos
+    networks: ["intranet"]
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  nginx:
+    image: nginx:1.21.5-alpine
+    ports: ["80:80"]
+    links:
+      - kratos:kratos
+    volumes:
+      - type: bind
+        source: ./JChat.Infrastructure/Files/nginx
+        target: /etc/nginx
+    networks: ["intranet"]
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  keto-migrate:
+    image: "oryd/keto:${ORY_KETO_VERSION}"
+    links: ["postgres:postgresd"]
+    environment:
+      LOG_LEVEL: debug
+      DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${ORY_KETO_DATABASE}?sslmode=disable&max_conns=20&max_idle_conns=4
+    volumes:
+      - type: bind
+        source: ./JChat.Infrastructure/Files/keto
+        target: /home/ory
+    command: [ "migrate", "up", "-y" ]
+    restart: on-failure
+    networks: ["intranet"]
+
+  keto:
+    image: "oryd/keto:${ORY_KETO_VERSION}"
+    depends_on: ["keto-migrate"]
+    links: ["postgres:postgresd"]
+    environment:
+      DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${ORY_KETO_DATABASE}?sslmode=disable&max_conns=20&max_idle_conns=4
+    ports:
+      - "4466:4466"
+      - "4467:4467"
+    volumes:
+      - type: bind
+        source: ./JChat.Infrastructure/Files/keto
+        target: /home/ory
+    networks: ["intranet"]
+
+volumes:
+  pgdata:
+
+networks:
+  intranet:

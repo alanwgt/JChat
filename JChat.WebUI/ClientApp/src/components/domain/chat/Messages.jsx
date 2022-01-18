@@ -1,17 +1,18 @@
 import React from 'react';
-import { styled } from 'baseui';
 
 import Message from '@/components/domain/chat/Message';
-
-const MessageContainer = styled('div', {
-  // display: 'flex',
-  // flexDirection: 'column',
-  paddingBottom: '8px',
-});
+import { useStyletron } from 'baseui';
 
 const Messages = ({ ...props }) => {
+  const [css] = useStyletron();
+
   return (
-    <MessageContainer {...props}>
+    <div
+      className={css({
+        paddingBottom: '8px',
+      })}
+      {...props}
+    >
       <Message>message 00</Message>
       <Message incoming>Message 01</Message>
       <Message>message 02</Message>
@@ -52,7 +53,7 @@ const Messages = ({ ...props }) => {
       <Message incoming>Message 02</Message>
       <Message>Message 02</Message>
       <Message>Message 02</Message>
-    </MessageContainer>
+    </div>
   );
 };
 

@@ -1,13 +1,23 @@
 import React from 'react';
-import { styled } from 'baseui';
+import { useStyletron } from 'baseui';
 import THEME from '@/styles/theme';
+import Messages from '@/components/domain/chat/Messages';
 
-const Container = styled('div', {
-  backgroundColor: THEME.colors.black,
-  width: '200px',
-  overflowY: 'auto',
-});
+const StarredMessages = () => {
+  const [css] = useStyletron();
 
-const StarredMessages = () => <Container>sadasd asdas asdasd</Container>;
+  return (
+    <div
+      className={css({
+        backgroundColor: THEME.colors.black,
+        width: '33vw',
+        minWidth: '200px',
+        overflowY: 'auto',
+      })}
+    >
+      <Messages />
+    </div>
+  );
+};
 
 export default StarredMessages;

@@ -35,9 +35,6 @@ const Header = () => {
           <Input
             size={SIZE.compact}
             placeholder={t('global-search-placeholder')}
-            className={css({
-              backgroundColor: 'white',
-            })}
           />
         </div>
         <UserMenu />

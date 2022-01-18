@@ -1,7 +1,7 @@
 import React from 'react';
 import Type from 'prop-types';
 import { styled } from 'baseui';
-import { Label3 } from 'baseui/typography';
+import { LabelSmall } from 'baseui/typography';
 
 import THEME from '@/styles/theme';
 
@@ -29,7 +29,7 @@ const TextContainer = styled('div', {
   overflowWrap: 'break-word',
 });
 
-const Text = styled(Label3, {
+const Text = styled(LabelSmall, {
   userSelect: 'text',
 });
 
@@ -46,11 +46,12 @@ const Message = ({ children, incoming, reaction, ...props }) => (
 Message.propTypes = {
   children: Type.element.isRequired,
   reaction: Type.element,
-  incoming: Type.bool.isRequired,
+  incoming: Type.bool,
 };
 
 Message.defaultProps = {
   reaction: null,
+  incoming: false,
 };
 
 export default Message;

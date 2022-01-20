@@ -7,7 +7,6 @@ public class Program
     public static async Task Main(string[] args)
     {
         var host = CreateHostBuilder(args).Build();
-        DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"));
 
         // using (var scope = host.Services.CreateScope())
         // {

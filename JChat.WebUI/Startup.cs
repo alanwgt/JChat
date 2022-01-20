@@ -4,6 +4,8 @@ using JChat.Application.Notifications;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Services;
 using JChat.Infrastructure;
+using JChat.Infrastructure.Files;
+using JChat.Infrastructure.Models;
 using JChat.WebUI.Filters;
 using JChat.WebUI.Security;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +23,20 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        DotEnv.Load(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"));
+        var presentationUrl = Environment.GetEnvironmentVariable("PRESENTATION_URL");
+
         services.AddHttpContextAccessor();
         services.AddApplication();
         services.AddControllers(options =>
             options.Filters.Add<ApiExceptionFilterAttribute>()
         ).AddFluentValidation(x => x.AutomaticValidationEnabled = false);
-        services.AddInfrastructure(Configuration);
+        services.AddInfrastructure(new InfrastructureConfig(
+            Environment.GetEnvironmentVariable("KRATOS_PUBLIC_URL"),
+            Environment.GetEnvironmentVariable("KETO_WRITE_URL"),
+            Environment.GetEnvironmentVariable("KETO_READ_URL"),
+            Environment.GetEnvironmentVariable("APP_DATABASE_CONNECTION_STRING")
+        ));
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddHealthChecks();
         services.AddAuthentication("Kratos")
@@ -42,15 +52,20 @@ public class Startup
             options.AddPolicy("dev", policy =>
             {
                 policy
-                    .WithOrigins("http://jchat.alanwgt.com")
+                    .WithOrigins(presentationUrl)
                     .AllowAnyMethod()
                     .AllowCredentials()
+                    .WithExposedHeaders("X-Workspace-Id")
                     .AllowAnyHeader();
             });
 
             options.AddPolicy("prod", policy =>
             {
-                // TODO
+                policy
+                    .WithOrigins(presentationUrl)
+                    .WithMethods("GET", "POST")
+                    .WithExposedHeaders("X-Workspace-Id")
+                    .AllowCredentials();
             });
         });
 
@@ -93,7 +108,5 @@ public class Startup
             endpoints.MapControllers();
             endpoints.MapHub<ChatHub>("/hub");
         });
-
-        // app.MapControllers();
     }
 }

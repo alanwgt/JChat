@@ -1,0 +1,48 @@
+# https://www.ory.sh/kratos/docs/next/reference/configuration/
+version: v0.8.2-alpha.1
+
+selfservice:
+  methods:
+    password:
+      enabled: true
+      config:
+        haveibeenpwned_enabled: true
+
+  flows:
+    login:
+      lifespan: 10m
+    registration:
+      lifespan: 10m
+      after:
+        password:
+          hooks:
+            - hook: session
+            - hook: web_hook
+              config:
+                body: file:///etc/config/kratos/registration_body.jsonnet
+                url: http://host:5000/hook/kratos/registration
+                method: post
+    recovery:
+      enabled: false
+    verification:
+      enabled: false
+    settings:
+      privileged_session_max_age: 15m
+
+hashers:
+  algorithm: bcrypt
+  bcrypt:
+    cost: 12
+
+ciphers:
+  algorithm: xchacha20-poly1305
+
+courier:
+  smtp:
+    connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true
+
+cookies:
+  same_site: Lax
+
+log:
+  format: text

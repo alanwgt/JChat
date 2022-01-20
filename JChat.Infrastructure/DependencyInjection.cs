@@ -32,6 +32,7 @@ public static class DependencyInjection
 
         services.AddTransient<IDateTime, DateTimeService>();
         services.AddTransient<IIdentityService, IdentityService>();
+        services.AddTransient<IAuthorizationService, AuthorizationService>();
         services.AddSingleton(infrastructureConfig);
         services.AddSingleton<IInfrastructureConfig>(provider => provider.GetRequiredService<InfrastructureConfig>());
 

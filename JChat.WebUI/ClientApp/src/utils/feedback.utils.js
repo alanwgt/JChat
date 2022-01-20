@@ -26,11 +26,18 @@ export default {
       ...toastConfig,
       ...props,
     }),
-  error: (children, props = {}) =>
-    toaster.negative(children, {
+  error: (children, props = {}) => {
+    let message = children;
+
+    if (children instanceof Error) {
+      message = children.message;
+    }
+
+    toaster.negative(message, {
       ...toastConfig,
       ...props,
-    }),
+    });
+  },
   negative: (children, props = {}) =>
     toaster.negative(children, {
       ...toastConfig,

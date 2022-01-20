@@ -10,8 +10,16 @@
   "explorer.channels": "",
   "explorer.direct": "",
   "global-search-placeholder": "",
+  "list.empty": "",
+  "modal.negative.btn": "",
+  "modal.positive.btn": "",
   "user.settings.header": "",
+  "workspace.add.btn": "",
   "workspace.change": "",
+  "workspace.modal.input.name.placeholder": "",
+  "workspace.selector.description": "",
+  "workspace.selector.title": "",
   "workspaces.selector.description": "",
-  "workspaces.selector.title": ""
+  "workspaces.selector.title": "",
+  "worspace.modal.create.title": ""
 }

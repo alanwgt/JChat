@@ -62,6 +62,8 @@ THEME.outgoingMessage = {
   backgroundColor: `${THEME.colors.themePrimary}77`,
 };
 
+THEME.colors.neutralPrimaryAlpha = `${THEME.colors.neutralPrimary}77`;
+
 // https://baseweb.design/guides/theming/
 const baseUiPrimitives = {
   accent: THEME.colors.accentGreen,
@@ -72,6 +74,18 @@ const baseUiOverrides = {
   },
 };
 
-export const baseUiTheme = createDarkTheme(baseUiPrimitives, baseUiOverrides);
+const theme = createDarkTheme(baseUiPrimitives, baseUiOverrides);
+
+theme.colors = {
+  ...theme.colors,
+  ...THEME.colors,
+};
+
+const { colors, ...themeProps } = THEME;
+
+export const baseUiTheme = {
+  ...theme,
+  ...themeProps,
+};
 
 export default THEME;

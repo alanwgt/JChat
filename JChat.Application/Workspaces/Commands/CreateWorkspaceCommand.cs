@@ -22,16 +22,18 @@ internal class CreateWorkspaceCommandHandlerValidator : AbstractValidator<Create
 
 internal class CreateWorkspaceCommandHandler : IRequestHandler<CreateWorkspaceCommand, WorkspaceBriefDto>
 {
+    private readonly IAuthorizationService _authorizationService;
     private readonly IApplicationDbContext _applicationContext;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
     public CreateWorkspaceCommandHandler(IApplicationDbContext applicationContext,
-        ICurrentUserService currentUserService, IMapper mapper)
+        ICurrentUserService currentUserService, IMapper mapper, IAuthorizationService authorizationService)
     {
         _applicationContext = applicationContext;
         _currentUserService = currentUserService;
         _mapper = mapper;
+        _authorizationService = authorizationService;
     }
 
     public async Task<WorkspaceBriefDto> Handle(CreateWorkspaceCommand request, CancellationToken cancellationToken)

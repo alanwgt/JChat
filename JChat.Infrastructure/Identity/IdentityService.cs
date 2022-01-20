@@ -5,7 +5,6 @@ using JChat.Infrastructure.Exceptions;
 using JChat.Infrastructure.Extensions;
 using JChat.Infrastructure.Interfaces;
 using JChat.Infrastructure.Persistence;
-using Ory.Keto.Client.Api;
 using Ory.Kratos.Client.Api;
 using User = JChat.Domain.Entities.User.User;
 
@@ -13,8 +12,7 @@ namespace JChat.Infrastructure.Identity;
 
 public class IdentityService : IIdentityService
 {
-    private readonly WriteApi _ketoWriteApi;
-    private readonly ReadApi _ketoReadApi;
+
     private readonly V0alpha2Api _kratosInstance;
     private readonly ApplicationDbContext _dbContext;
 
@@ -25,14 +23,7 @@ public class IdentityService : IIdentityService
         {
             BasePath = infrastructureConfig.KratosBasePath,
         };
-        _ketoReadApi = new ReadApi(new Ory.Keto.Client.Client.Configuration
-        {
-            BasePath = infrastructureConfig.KetoReadBasePath,
-        });
-        _ketoWriteApi = new WriteApi(new Ory.Keto.Client.Client.Configuration
-        {
-            BasePath = infrastructureConfig.KetoWriteBasePath,
-        });
+
         _kratosInstance = new V0alpha2Api(kratosConfig);
     }
 

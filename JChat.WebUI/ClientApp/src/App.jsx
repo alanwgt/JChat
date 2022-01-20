@@ -1,12 +1,13 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { hot } from 'react-hot-loader/root';
 
+import { hot } from 'react-hot-loader/root';
+import { connect } from 'react-redux';
+
+import { Workspaces } from '@/api';
+import WorkspaceSelector from '@/components/domain/workspace/WorkspaceSelector';
+import paginatedRemoteDataHoc from '@/hocs/paginatedRemoteDataHoc';
 import { useAuth } from '@/providers/authContext';
 import { isWorkspaceSelectedSelector } from '@/store/workspace/workspace.selectors';
-import paginatedRemoteDataHoc from '@/hocs/paginatedRemoteDataHoc';
-import WorkspaceSelector from '@/components/domain/workspace/WorkspaceSelector';
-import { Workspaces } from '@/api';
 
 const AuthenticatedApp = React.lazy(() => import('./AuthenticatedApp'));
 const UnauthenticatedApp = React.lazy(() => import('./UnauthenticatedApp'));

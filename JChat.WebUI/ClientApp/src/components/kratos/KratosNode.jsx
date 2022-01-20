@@ -1,11 +1,11 @@
 import React from 'react';
-import { FormControl } from 'baseui/form-control';
-import { Controller } from 'react-hook-form';
+
 // eslint-disable-next-line no-unused-vars
 import { UiNode } from '@ory/kratos-client';
+import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
+import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Paragraph4 } from 'baseui/typography';
 
 /**
  * @param {UiNode} node
@@ -23,6 +23,7 @@ const KratosNode = ({ control, error, node }) => {
     );
   }
 
+  // TODO: use FormInput
   return (
     <FormControl
       label={t(`kratos.${node.attributes.name}`)}

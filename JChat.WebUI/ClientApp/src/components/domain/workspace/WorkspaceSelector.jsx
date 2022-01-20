@@ -1,42 +1,78 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Display4, Paragraph3 } from 'baseui/typography';
-import { useTranslation } from 'react-i18next';
 
+import { useStyletron } from 'baseui';
+import { HeadingMedium, ParagraphSmall } from 'baseui/typography';
+import { useTranslation } from 'react-i18next';
+import { connect } from 'react-redux';
+
+import AddResourceButton from '@/components/button/AddResourceButton';
 import FullScreen from '@/components/display/FullScreen';
+import CreateWorkspaceModal from '@/components/domain/workspace/CreateWorkspaceModal';
 import WorkspaceList from '@/components/domain/workspace/WorkspaceList';
 import { setWorkspace } from '@/store/workspace/workspace.actions';
 import THEME from '@/styles/theme';
-import { useStyletron } from 'baseui';
+import feedbackUtils from '@/utils/feedback.utils';
 
 const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
+  const [modalIsOpen, setModalIsOpen] = React.useState(false);
+  const [workspacesList, setWorkspacesList] = React.useState(workspaces);
   const [css] = useStyletron();
   const [t] = useTranslation();
 
+  // TODO: add workspace invites
+
+  const onCreate = (workspace) => {
+    setWorkspacesList([...workspacesList, workspace]);
+    setModalIsOpen(false);
+    feedbackUtils.positive(t('workspace.created.messsage'));
+  };
+
   return (
-    <FullScreen>
-      <div
-        className={css({
-          padding: THEME.padding,
-        })}
-      >
-        <Display4
-          $style={{
-            textAlign: 'center',
-            marginBottom: THEME.padding,
-          }}
-        >
-          {t('workspace.selector.title')}
-        </Display4>
-        <Paragraph3>{t('workspace.selector.description')}</Paragraph3>
-      </div>
-      <WorkspaceList
-        workspaces={workspaces}
-        onClick={({ id, name }) => {
-          selectWorkspace(id, name);
-        }}
+    <>
+      <CreateWorkspaceModal
+        onCreate={onCreate}
+        isOpen={modalIsOpen}
+        setIsOpen={setModalIsOpen}
       />
-    </FullScreen>
+      <FullScreen>
+        <div
+          className={css({
+            padding: THEME.padding,
+          })}
+        >
+          <HeadingMedium
+            $style={{
+              textAlign: 'center',
+              marginBottom: THEME.padding,
+            }}
+          >
+            {t('workspace.selector.title')}
+          </HeadingMedium>
+          <div
+            className={css({
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            })}
+          >
+            <ParagraphSmall>{t('workspace.selector.description')}</ParagraphSmall>
+            <AddResourceButton
+              onClick={() => {
+                setModalIsOpen(true);
+              }}
+            >
+              {t('workspace.add.btn')}
+            </AddResourceButton>
+          </div>
+        </div>
+        <WorkspaceList
+          workspaces={workspacesList}
+          onClick={({ id, name }) => {
+            selectWorkspace(id, name);
+          }}
+        />
+      </FullScreen>
+    </>
   );
 };
 

@@ -1,25 +1,25 @@
 import 'react-hot-loader';
 import React from 'react';
-import { render } from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider as ReactProvider } from 'react-redux';
-import { Client as Styletron } from 'styletron-engine-atomic';
-import { DebugEngine, Provider as StyletronProvider } from 'styletron-react';
+
 import { BaseProvider as BaseUiProvider } from 'baseui';
 import { ToasterContainer } from 'baseui/toast';
+import { render } from 'react-dom';
+import { Provider as ReactProvider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { Client as Styletron } from 'styletron-engine-atomic';
+import { DebugEngine, Provider as StyletronProvider } from 'styletron-react';
 
+import FullscreenSpinner from '@/components/feedback/FullscreenSpinner';
 import { AuthProvider } from '@/providers/authContext';
 import { UserProvider } from '@/providers/userContext';
-
-import App from './src/App';
 import store from '@/store';
-
+import '@/styles/global.css';
+import '@/styles/lineIcon.css';
+import '@/styles/reset.css';
 import { baseUiTheme } from '@/styles/theme';
 
+import App from './src/App';
 import './src/i18n';
-import '@/styles/reset.css';
-import '@/styles/global.css';
-import FullscreenSpinner from '@/components/feedback/FullscreenSpinner';
 
 const engine = new Styletron();
 const debug =

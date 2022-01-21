@@ -63,6 +63,7 @@ THEME.outgoingMessage = {
 };
 
 THEME.colors.neutralPrimaryAlpha = `${THEME.colors.neutralPrimary}77`;
+THEME.colors.neutralDarkAlpha = `${THEME.colors.neutralDark}D9`;
 
 // https://baseweb.design/guides/theming/
 const baseUiPrimitives = {

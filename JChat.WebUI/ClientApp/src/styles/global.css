@@ -3,6 +3,10 @@ body {
     background: black;
 }
 
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
 /* Works on Firefox */
 * {
     scrollbar-width: auto;

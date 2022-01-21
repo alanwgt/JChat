@@ -3,7 +3,7 @@ import React from 'react';
 import List from '@/components/data-display/list/List';
 import ListItem from '@/components/data-display/list/ListItem';
 
-const WorkspaceList = ({ workspaces, onClick }) => (
+const WorkspaceList = ({ workspaces, onClick, ...props }) => (
   <List
     items={workspaces}
     render={(workspace) => (
@@ -16,6 +16,7 @@ const WorkspaceList = ({ workspaces, onClick }) => (
         {workspace.name}
       </ListItem>
     )}
+    {...props}
   />
 );
 

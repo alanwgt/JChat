@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
 import AddResourceButton from '@/components/button/AddResourceButton';
-import FullScreen from '@/components/display/FullScreen';
+import FullscreenInput from '@/components/display/FullscreenInput';
 import CreateWorkspaceModal from '@/components/domain/workspace/CreateWorkspaceModal';
 import WorkspaceList from '@/components/domain/workspace/WorkspaceList';
 import { setWorkspace } from '@/store/workspace/workspace.actions';
@@ -34,10 +34,10 @@ const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
         isOpen={modalIsOpen}
         setIsOpen={setModalIsOpen}
       />
-      <FullScreen>
+      <FullscreenInput>
         <div
           className={css({
-            padding: THEME.padding,
+            marginBottom: THEME.padding,
           })}
         >
           <HeadingMedium
@@ -55,7 +55,9 @@ const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
               justifyContent: 'space-between',
             })}
           >
-            <ParagraphSmall>{t('workspace.selector.description')}</ParagraphSmall>
+            <ParagraphSmall>
+              {t('workspace.selector.description')}
+            </ParagraphSmall>
             <AddResourceButton
               onClick={() => {
                 setModalIsOpen(true);
@@ -70,8 +72,11 @@ const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
           onClick={({ id, name }) => {
             selectWorkspace(id, name);
           }}
+          className={css({
+            width: '100%',
+          })}
         />
-      </FullScreen>
+      </FullscreenInput>
     </>
   );
 };

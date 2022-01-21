@@ -1,22 +1,22 @@
 import React from 'react';
-import { styled, useStyletron } from 'baseui';
-import { useTranslation } from 'react-i18next';
-import { Input, SIZE } from 'baseui/input';
 
-import THEME from '@/styles/theme';
-import UserSettingsModal from '@/components/auth/UserSettingsModal';
+import { styled, useStyletron } from 'baseui';
+import { Input, SIZE } from 'baseui/input';
+import { useTranslation } from 'react-i18next';
+
 import UserMenu from '@/components/auth/UserMenu';
+import UserSettingsModal from '@/components/auth/UserSettingsModal';
 import Logo from '@/components/typography/icons/Logo';
 
-const Container = styled('div', {
+const Container = styled('div', ({ $theme }) => ({
   display: 'flex',
-  backgroundColor: THEME.colors.themeDark,
+  backgroundColor: $theme.colors.themeDark,
   alignItems: 'center',
-  padding: `5px ${THEME.padding}`,
+  padding: `5px ${$theme.padding}`,
   justifyContent: 'space-between',
   width: '100%',
   boxSizing: 'border-box',
-});
+}));
 
 const Header = () => {
   const { t } = useTranslation();

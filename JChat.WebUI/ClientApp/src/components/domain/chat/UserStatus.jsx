@@ -1,9 +1,9 @@
 import React from 'react';
-import Type from 'prop-types';
+
 import { styled } from 'baseui';
 import { Label4 } from 'baseui/typography';
+import Type from 'prop-types';
 
-import THEME from '@/styles/theme';
 import DotStatus from '@/components/domain/chat/DotStatus';
 import UserAvatar from '@/components/user/UserAvatar';
 

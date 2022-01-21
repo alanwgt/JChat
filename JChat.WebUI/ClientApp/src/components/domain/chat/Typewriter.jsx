@@ -1,19 +1,20 @@
 import React from 'react';
-import { useStyletron } from 'baseui';
+
+import { styled } from 'baseui';
 import { useTranslation } from 'react-i18next';
-import THEME from '@/styles/theme';
+
+const TypewriterContainer = styled('div', ({ $theme }) => ({
+  backgroundColor: $theme.colors.b3,
+  padding: $theme.padding,
+  boxShadow: $theme.shadow3inverted,
+  height: '20px',
+}));
 
 const Typewriter = ({ ...props }) => {
   const { t } = useTranslation();
-  const [css] = useStyletron();
 
   return (
-    <div
-      className={css({
-        height: '20px',
-      })}
-      {...props}
-    >
+    <TypewriterContainer {...props}>
       {/*<Input*/}
       {/*  placeholder={t('typewriter.placeholder')}*/}
       {/*  className={css({*/}
@@ -22,18 +23,18 @@ const Typewriter = ({ ...props }) => {
       {/*    borderBottom: '1px dashed rgba(153, 153, 153, 0.4)',*/}
       {/*  })}*/}
       {/*/>*/}
-      <div
-        className={css({
-          borderBottomLeftRadius: '5px',
-          borderBottomRightRadius: '5px',
-          border: '1px solid rgba(153, 153, 153, 0.4)',
-          borderTop: 'none',
-          padding: THEME.inputPadding,
-        })}
-      >
-        test
-      </div>
-    </div>
+      {/*<div*/}
+      {/*  className={css({*/}
+      {/*    borderBottomLeftRadius: '5px',*/}
+      {/*    borderBottomRightRadius: '5px',*/}
+      {/*    border: '1px solid rgba(153, 153, 153, 0.4)',*/}
+      {/*    borderTop: 'none',*/}
+      {/*    padding: THEME.inputPadding,*/}
+      {/*  })}*/}
+      {/*>*/}
+      {/*  test*/}
+      {/*</div>*/}
+    </TypewriterContainer>
   );
 };
 

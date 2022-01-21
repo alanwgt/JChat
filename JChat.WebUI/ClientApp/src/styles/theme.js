@@ -88,5 +88,3 @@ export const baseUiTheme = {
   ...theme,
   ...themeProps,
 };
-
-export default THEME;

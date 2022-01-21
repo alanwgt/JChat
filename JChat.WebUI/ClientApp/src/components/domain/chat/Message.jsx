@@ -1,9 +1,8 @@
 import React from 'react';
-import Type from 'prop-types';
+
 import { styled } from 'baseui';
 import { LabelSmall } from 'baseui/typography';
-
-import THEME from '@/styles/theme';
+import Type from 'prop-types';
 
 const MessageContainer = styled('div', ({ $incoming }) => ({
   marginBottom: '2px',
@@ -13,14 +12,14 @@ const MessageContainer = styled('div', ({ $incoming }) => ({
   justifyContent: $incoming ? 'flex-start' : 'flex-end',
 }));
 
-const StyledMessage = styled('div', ({ $incoming }) => ({
+const StyledMessage = styled('div', ({ $theme, $incoming }) => ({
   maxWidth: '65%',
   padding: '6px 7px 6px 9px',
-  borderRadius: THEME.borderRadius,
+  borderRadius: $theme.borderRadius,
   width: 'fit-content',
   boxShadow: '0 1px .5px rgba(0,0,0,.13)',
   verticalAlign: 'baseline',
-  ...($incoming ? THEME.incomingMessage : THEME.outgoingMessage),
+  ...($incoming ? $theme.incomingMessage : $theme.outgoingMessage),
 }));
 
 const TextContainer = styled('div', {

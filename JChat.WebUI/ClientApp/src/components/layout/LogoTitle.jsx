@@ -1,9 +1,9 @@
 import React from 'react';
+
 import { useStyletron } from 'baseui';
 import { Display4 } from 'baseui/typography';
 
 import Logo from '@/components/typography/icons/Logo';
-import THEME from '@/styles/theme';
 
 const LogoTitle = ({ title, ...props }) => {
   const [css] = useStyletron();
@@ -12,7 +12,7 @@ const LogoTitle = ({ title, ...props }) => {
     <div
       className={css({
         display: 'flex',
-        marginBottom: THEME.padding,
+        marginBottom: '15px',
       })}
       {...props}
     >

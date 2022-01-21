@@ -1,16 +1,16 @@
 import React from 'react';
-import Type from 'prop-types';
+
 import { styled } from 'baseui';
 
 import UserStatus from '@/components/domain/chat/UserStatus';
-import THEME from '@/styles/theme';
 
-const Container = styled('div', {
-  backgroundColor: THEME.colors.b3,
+const Container = styled('div', ({ $theme }) => ({
+  backgroundColor: $theme.colors.b3,
   display: 'flex',
   alignItems: 'center',
-  padding: THEME.padding,
-});
+  padding: $theme.padding,
+  boxShadow: $theme.shadow3,
+}));
 
 const ChatInfo = ({ name, ...props }) => (
   <Container {...props}>

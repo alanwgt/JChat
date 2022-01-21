@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+
 import { styled } from 'baseui';
+import { useTranslation } from 'react-i18next';
 
 import DirectMessage from '@/components/domain/chat/DirectMessage';
-import THEME from '@/styles/theme';
 
-const StyledPanel = styled('div', {
-  padding: `0 5px ${THEME.padding} 5px`,
-});
+const StyledPanel = styled('div', ({ $theme }) => ({
+  padding: `0 5px ${$theme.padding} 5px`,
+}));
 
 const Explorer = ({ ...props }) => {
   const { t } = useTranslation();

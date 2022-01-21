@@ -10,7 +10,6 @@ import FullscreenInput from '@/components/display/FullscreenInput';
 import CreateWorkspaceModal from '@/components/domain/workspace/CreateWorkspaceModal';
 import WorkspaceList from '@/components/domain/workspace/WorkspaceList';
 import { setWorkspace } from '@/store/workspace/workspace.actions';
-import THEME from '@/styles/theme';
 import feedbackUtils from '@/utils/feedback.utils';
 
 const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
@@ -37,13 +36,13 @@ const WorkspaceSelector = ({ workspaces, selectWorkspace }) => {
       <FullscreenInput>
         <div
           className={css({
-            marginBottom: THEME.padding,
+            marginBottom: '20px',
           })}
         >
           <HeadingMedium
             $style={{
               textAlign: 'center',
-              marginBottom: THEME.padding,
+              marginBottom: '20px',
             }}
           >
             {t('workspace.selector.title')}

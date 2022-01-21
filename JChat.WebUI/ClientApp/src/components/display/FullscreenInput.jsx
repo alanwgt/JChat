@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { styled } from 'baseui';
+import { expandBorderStyles } from 'baseui/styles';
 
 import FullScreen from '@/components/display/FullScreen';
 
@@ -14,6 +15,7 @@ const Container = styled('div', ({ $theme }) => ({
   padding: '30px',
   backdropFilter: 'blur(5px)',
   maxWidth: '400px',
+  ...expandBorderStyles($theme.borders.border600),
 }));
 
 const FullscreenInput = ({ children, ...props }) => (

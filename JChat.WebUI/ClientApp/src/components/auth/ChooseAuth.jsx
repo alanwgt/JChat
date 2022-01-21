@@ -1,10 +1,10 @@
 import React from 'react';
-import { Paragraph4 } from 'baseui/typography';
-import { ButtonGroup, SIZE } from 'baseui/button-group';
+
 import { Button } from 'baseui/button';
+import { ButtonGroup, SIZE } from 'baseui/button-group';
+import { Paragraph4 } from 'baseui/typography';
 import { useTranslation } from 'react-i18next';
 
-import THEME from '@/styles/theme';
 import Hackerman from '@/components/display/Hackerman';
 import LogoTitle from '@/components/layout/LogoTitle';
 import HackedText from '@/components/typography/HackedText';
@@ -27,7 +27,16 @@ const ChooseAuth = ({ onSelect }) => {
       >
         {t('auth.description')}
       </Paragraph4>
-      <ButtonGroup size={SIZE.large}>
+      <ButtonGroup
+        size={SIZE.large}
+        overrides={{
+          Root: {
+            style: ({ $theme }) => ({
+              gap: $theme.padding,
+            }),
+          },
+        }}
+      >
         <Button
           onClick={() => {
             onSelect(AuthAction.SignIn);
@@ -38,9 +47,6 @@ const ChooseAuth = ({ onSelect }) => {
         <Button
           onClick={() => {
             onSelect(AuthAction.SignUp);
-          }}
-          $style={{
-            marginLeft: THEME.padding,
           }}
         >
           {t('auth.register')}

@@ -1,16 +1,17 @@
 import React from 'react';
-import Type from 'prop-types';
+
 import { styled } from 'baseui';
-import THEME from '@/styles/theme';
+import Type from 'prop-types';
+
 import UserStatus from '@/components/domain/chat/UserStatus';
 
-const DM = styled('div', {
+const DM = styled('div', ({ $theme }) => ({
   display: 'flex',
   ':not(:last-of-type)': {
     marginBottom: '5px',
   },
-  ...THEME.textBreak,
-});
+  ...$theme.textBreak,
+}));
 
 const DirectMessage = ({ name }) => {
   return (

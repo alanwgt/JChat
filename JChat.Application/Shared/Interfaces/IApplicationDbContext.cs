@@ -3,6 +3,7 @@ using JChat.Domain.Entities.Message;
 using JChat.Domain.Entities.User;
 using JChat.Domain.Entities.Workspace;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace JChat.Application.Shared.Interfaces;
 
@@ -20,4 +21,5 @@ public interface IApplicationDbContext
    DbSet<Reaction> Reactions { get; }
    DbSet<ChannelUser> ChannelUsers { get; }
    DbSet<UserWorkspace> UserWorkspaces { get; }
+   DatabaseFacade Database { get; }
 }

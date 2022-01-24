@@ -21,5 +21,6 @@ public interface IApplicationDbContext
    DbSet<Reaction> Reactions { get; }
    DbSet<ChannelUser> ChannelUsers { get; }
    DbSet<UserWorkspace> UserWorkspaces { get; }
+   DbSet<Channel> Channels { get; }
    DatabaseFacade Database { get; }
 }

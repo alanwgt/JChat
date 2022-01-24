@@ -10,6 +10,7 @@ public class Workspace : AuditableEntity
     public string Name { get; private set; }
 
     public ICollection<UserWorkspace> UserWorkspaces { get; } = new List<UserWorkspace>();
+    public ICollection<Channel.Channel> Channels { get; } = new List<Channel.Channel>();
 
     public Workspace(string name)
     {
@@ -23,5 +24,12 @@ public class Workspace : AuditableEntity
         var userWorkspace = new UserWorkspace(Id, userId, admin);
         UserWorkspaces.Add(userWorkspace);
         return userWorkspace;
+    }
+
+    public Channel.Channel CreateChannel(string name, bool isPrivate)
+    {
+        var channel = new Channel.Channel(Id, name, isPrivate);
+        Channels.Add(channel);
+        return channel;
     }
 }

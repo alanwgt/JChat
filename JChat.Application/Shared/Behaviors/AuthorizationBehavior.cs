@@ -13,13 +13,15 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
     private readonly ICurrentUserService _currentUserService;
     private readonly IIdentityService _identityService;
     private readonly ILogger<AuthorizationBehavior<TRequest, TResponse>> _logger;
+    private readonly ICurrentWorkspaceService _currentWorkspaceService;
 
     public AuthorizationBehavior(ICurrentUserService currentUserService, IIdentityService identityService,
-        ILogger<AuthorizationBehavior<TRequest, TResponse>> logger)
+        ILogger<AuthorizationBehavior<TRequest, TResponse>> logger, ICurrentWorkspaceService currentWorkspaceService)
     {
         _currentUserService = currentUserService;
         _identityService = identityService;
         _logger = logger;
+        _currentWorkspaceService = currentWorkspaceService;
     }
 
     public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
@@ -34,6 +36,17 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
             }
 
             br.User = _currentUserService.User;
+        }
+
+        if (request is IHasWorkspaceIdSetter idSetter)
+        {
+            if (!_currentWorkspaceService.WorkspaceId.HasValue)
+            {
+                _logger.LogError("A command with required workspace id was fired without a workspace id");
+                throw new UnauthorizedAccessException();
+            }
+
+            idSetter.WorkspaceId = _currentWorkspaceService.WorkspaceId.Value;
         }
 
         var authorizationAttributes = request.GetType().GetCustomAttributes<AuthorizeAttribute>();

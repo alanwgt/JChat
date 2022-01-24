@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<ChannelUser> ChannelUsers => Set<ChannelUser>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<UserWorkspace> UserWorkspaces => Set<UserWorkspace>();
+    public DbSet<Channel> Channels => Set<Channel>();
 
     private ApplicationDbContext()
     {

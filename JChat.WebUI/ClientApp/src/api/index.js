@@ -1,7 +1,6 @@
 // eslint-disable-next-line import/extensions,import/no-unresolved
-import axios from '@/services/axios.service';
-
 import * as ApiDeclaration from './web-api-client';
+import axios from '@/services/axios.service';
 
 export const Channel = new ApiDeclaration.ChannelClient(
   'http://api.jchat.alanwgt.com',

@@ -8,5 +8,12 @@ public class ChannelConfiguration : IEntityTypeConfiguration<Channel>
 {
     public void Configure(EntityTypeBuilder<Channel> builder)
     {
+        builder.Property(c => c.Name)
+            .HasMaxLength(50)
+            .IsRequired();
+
+        builder
+            .HasIndex(c => new { c.Name, c.WorkspaceId })
+            .IsUnique();
     }
 }

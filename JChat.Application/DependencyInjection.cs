@@ -1,6 +1,8 @@
 using System.Reflection;
 using JChat.Application.Shared.Behaviors;
 using FluentValidation;
+using JChat.Application.Shared.Interfaces;
+using JChat.Application.Shared.Services;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +17,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddMediatR(Assembly.GetExecutingAssembly());
 
+        services.AddScoped<ICurrentWorkspaceService, CurrentWorkspaceService>();
         services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));

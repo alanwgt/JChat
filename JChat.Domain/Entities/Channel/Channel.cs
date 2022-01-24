@@ -9,5 +9,19 @@ public class Channel : UserEntity
     public bool IsPrivate { get; protected set; }
 
     public Workspace.Workspace Workspace { get; protected set; }
-    public IEnumerable<ChannelUser> Users { get; protected set; } = new List<ChannelUser>();
+    public ICollection<ChannelUser> Users { get; protected set; } = new List<ChannelUser>();
+
+    public Channel(Guid workspaceId, string name, bool isPrivate)
+    {
+        WorkspaceId = workspaceId;
+        Name = name;
+        IsPrivate = isPrivate;
+    }
+
+    public ChannelUser AddUser(Guid userId, bool isAdmin = false)
+    {
+        var cUser = new ChannelUser(Id, userId, isAdmin);
+        Users.Add(cUser);
+        return cUser;
+    }
 }

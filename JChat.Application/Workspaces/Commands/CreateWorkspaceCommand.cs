@@ -12,7 +12,7 @@ public record CreateWorkspaceCommand(string Name) : IRequest<WorkspaceBriefDto>;
 
 public class CreateWorkspaceCommandHandlerValidator : AbstractValidator<CreateWorkspaceCommand>
 {
-    private CreateWorkspaceCommandHandlerValidator()
+    public CreateWorkspaceCommandHandlerValidator()
     {
         RuleFor(w => w.Name)
             .NotNull()

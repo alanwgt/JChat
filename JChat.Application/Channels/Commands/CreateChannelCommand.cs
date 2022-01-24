@@ -17,7 +17,7 @@ public class CreateChannelCommand : WorkspaceScopedRequest<ChannelBriefDto>
 
 public class CreateChannelCommandValidator : AbstractValidator<CreateChannelCommand>
 {
-    private CreateChannelCommandValidator()
+    public CreateChannelCommandValidator()
     {
         RuleFor(c => c.Name)
             .NotNull()
@@ -31,22 +31,22 @@ public class CreateChannelCommandValidator : AbstractValidator<CreateChannelComm
 
 public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand, ChannelBriefDto>
 {
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IApplicationDbContext _applicationContext;
+    private readonly IAuthorizationService _authorization;
+    private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public CreateChannelCommandHandler(IAuthorizationService authorizationService,
-        IApplicationDbContext applicationContext, IMapper mapper)
+    public CreateChannelCommandHandler(IAuthorizationService authorization,
+        IApplicationDbContext context, IMapper mapper)
     {
-        _authorizationService = authorizationService;
-        _applicationContext = applicationContext;
+        _authorization = authorization;
+        _context = context;
         _mapper = mapper;
     }
 
     public async Task<ChannelBriefDto> Handle(CreateChannelCommand request, CancellationToken cancellationToken)
     {
         var channel = new Channel(request.WorkspaceId, request.Name, request.IsPrivate);
-        await using var transaction = await _applicationContext.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
         var userId = request.User.Id;
         var cUser = channel.AddUser(userId, true);
         var ns = AuthzNamespace.Channels.Str();
@@ -54,10 +54,10 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
 
         try
         {
-            await _applicationContext.Channels.AddAsync(channel, cancellationToken);
-            await _applicationContext.ChannelUsers.AddAsync(cUser, cancellationToken);
+            await _context.Channels.AddAsync(channel, cancellationToken);
+            await _context.ChannelUsers.AddAsync(cUser, cancellationToken);
 
-            await _authorizationService.Authorize(
+            await _authorization.Authorize(
                 ns,
                 channelId,
                 AuthzRelation.Ownership.Str(),
@@ -65,7 +65,7 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
                 cancellationToken
             );
 
-            await _authorizationService.Authorize(
+            await _authorization.Authorize(
                 ns,
                 channelId,
                 AuthzRelation.Manage.Str(),
@@ -76,7 +76,7 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
                 cancellationToken
             );
 
-            await _authorizationService.Authorize(
+            await _authorization.Authorize(
                 ns,
                 channelId,
                 AuthzRelation.Member.Str(),
@@ -87,7 +87,7 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
                 cancellationToken
             );
 
-            await _authorizationService.Authorize(
+            await _authorization.Authorize(
                 ns,
                 channelId,
                 AuthzRelation.Write.Str(),
@@ -98,7 +98,7 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
                 cancellationToken
             );
 
-            await _authorizationService.Authorize(
+            await _authorization.Authorize(
                 ns,
                 channelId,
                 AuthzRelation.Read.Str(),

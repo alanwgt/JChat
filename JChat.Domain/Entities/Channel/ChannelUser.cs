@@ -18,4 +18,9 @@ public class ChannelUser : Entity
         UserId = userId;
         IsAdmin = admin;
     }
+
+    public void SetIsAdmin(bool isAdmin)
+    {
+        IsAdmin = isAdmin;
+    }
 }

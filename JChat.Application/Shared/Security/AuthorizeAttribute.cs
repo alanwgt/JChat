@@ -5,7 +5,8 @@ public class AuthorizeAttribute : Attribute
 {
     public AuthorizeAttribute() { }
 
-    public string Subject { get; set; } = string.Empty;
-    public string Object { get; set; } = string.Empty;
-    public string Namespace { get; set; } = string.Empty;
+    public string? Subject { get; set; } = null;
+    public string Object { get; set; }
+    public string Namespace { get; set; }
+    public string Relation { get; set; }
 }

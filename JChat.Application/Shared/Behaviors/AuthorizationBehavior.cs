@@ -2,8 +2,10 @@ using System.Reflection;
 using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Security;
+using JChat.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationException;
 
 namespace JChat.Application.Shared.Behaviors;
 
@@ -11,22 +13,25 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
     where TRequest : notnull
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IIdentityService _identityService;
     private readonly ILogger<AuthorizationBehavior<TRequest, TResponse>> _logger;
     private readonly ICurrentWorkspaceService _currentWorkspaceService;
+    private readonly IAuthorizationService _authorization;
 
-    public AuthorizationBehavior(ICurrentUserService currentUserService, IIdentityService identityService,
-        ILogger<AuthorizationBehavior<TRequest, TResponse>> logger, ICurrentWorkspaceService currentWorkspaceService)
+    public AuthorizationBehavior(ICurrentUserService currentUserService,
+        ILogger<AuthorizationBehavior<TRequest, TResponse>> logger, ICurrentWorkspaceService currentWorkspaceService,
+        IAuthorizationService authorization)
     {
         _currentUserService = currentUserService;
-        _identityService = identityService;
         _logger = logger;
         _currentWorkspaceService = currentWorkspaceService;
+        _authorization = authorization;
     }
 
     public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
         RequestHandlerDelegate<TResponse> next)
     {
+        IUser? user = null;
+
         if (request is IHasUserSetter br)
         {
             if (_currentUserService.User == null)
@@ -36,6 +41,7 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
             }
 
             br.User = _currentUserService.User;
+            user = br.User;
         }
 
         if (request is IHasWorkspaceIdSetter idSetter)
@@ -54,12 +60,35 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
         if (!authorizationAttributes.Any())
             return await next();
 
-        // TODO: handle authorization!!
-        return await next();
-        var authorized = false;
+        if (user == null)
+        {
+            _logger.LogError("A command with required authz was fired by an unauthenticated user");
+            throw new UnauthorizedAccessException();
+        }
 
-        if (!authorized)
-            throw new ForbiddenAccessException();
+        foreach (var authorizeAttribute in authorizationAttributes)
+        {
+            var objectId = request.GetType().GetProperty(authorizeAttribute.Object).GetValue(request);
+
+            if (objectId == null)
+            {
+                _logger.LogError("couldn't find the object id in authorization behavior");
+                throw new ApplicationException("object id not found in request");
+            }
+
+            var authzRequest = _authorization.Can(
+                authorizeAttribute.Namespace,
+                (string) objectId,
+                authorizeAttribute.Relation,
+                authorizeAttribute.Subject ?? user.Id.ToString(),
+                cancellationToken
+            );
+
+            if (!await authzRequest)
+            {
+                throw new ForbiddenAccessException($"unauthorized access in command {request.GetType().Name}");
+            }
+        }
 
         return await next();
     }

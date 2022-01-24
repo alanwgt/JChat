@@ -3,6 +3,7 @@ using JChat.Domain.Enums;
 using JChat.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationException;
 
 namespace JChat.WebUI.Filters;
 
@@ -23,6 +24,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
             { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
             { typeof(DomainValidationException), HandleDomainValidationException },
+            { typeof(ApplicationException), HandleUnknownException }
         };
     }
 

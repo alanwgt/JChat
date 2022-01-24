@@ -23,7 +23,7 @@ public class AuthorizationService : IAuthorizationService
         {
             BasePath = infrastructureConfig.KetoReadBasePath,
         });
-        _writeApi = new WriteApi(new Ory.Keto.Client.Client.Configuration
+        _writeApi = new WriteApi(new Configuration
         {
             BasePath = infrastructureConfig.KetoWriteBasePath,
         });
@@ -122,4 +122,20 @@ public class AuthorizationService : IAuthorizationService
             cancellationToken
         );
     }
+
+    public Task RemoveAuthorization(string? @namespace = null, string? @object = null, string? relation = null,
+        string? subjectId = null, string? subjectSetNamespace = null, string? subjectSetObject = null,
+        string? subjectSetRelation = null, CancellationToken cancellationToken = default
+    )
+    {
+        return _writeApi.DeleteRelationTupleAsync(
+            @namespace, @object, relation, subjectId, subjectSetNamespace, subjectSetObject,
+            subjectSetRelation, cancellationToken
+        );
+    }
+
+    public Task RemoveAuthorization(string @namespace, string @object, string relation, string subjectId,
+        CancellationToken cancellationToken = default
+    ) => RemoveAuthorization(@namespace, @object, relation, subjectId, null,
+        null, null, cancellationToken);
 }

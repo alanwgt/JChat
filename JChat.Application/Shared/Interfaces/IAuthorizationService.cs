@@ -34,4 +34,13 @@ public interface IAuthorizationService
         string? subjectSetObject = null,
         string? subjectSetRelation = null,
         CancellationToken cancellationToken = default);
+
+    Task RemoveAuthorization(string? @namespace = null, string? @object = null, string? relation = null,
+        string? subjectId = null, string? subjectSetNamespace = null, string? subjectSetObject = null,
+        string? subjectSetRelation = null, CancellationToken cancellationToken = default
+    );
+
+    Task RemoveAuthorization(string @namespace, string @object, string relation, string subjectId,
+        CancellationToken cancellationToken = default
+    );
 }

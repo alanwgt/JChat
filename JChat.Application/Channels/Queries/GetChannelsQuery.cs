@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JChat.Application.Channels.Queries;
 
-[Authorize(Namespace = "workspaces", Object = "WorkspaceId", Relation = "read")]
+[Authorize(Namespace = "workspaces", ObjectIdFromProperty = "WorkspaceId", Relation = "read")]
 public class GetChannelsQuery : WorkspaceScopedPaginatedRequest<ChannelBriefDto>
 {
 }

@@ -10,7 +10,7 @@ using MediatR;
 
 namespace JChat.Application.Channels.Commands;
 
-[Authorize(Namespace = "workspaces", Object = "WorkspaceId", Relation = "write")]
+[Authorize(Namespace = "workspaces", ObjectIdFromProperty = "WorkspaceId", Relation = "write")]
 public class CreateChannelCommand : WorkspaceScopedRequest<ChannelBriefDto>
 {
     public string Name { get; set; }

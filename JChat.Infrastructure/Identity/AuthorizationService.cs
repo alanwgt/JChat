@@ -82,7 +82,7 @@ public class AuthorizationService : IAuthorizationService
         => Can(@namespace, @object, relation, subjectId, null, null, null, cancellationToken);
 
     /// <summary>
-    /// Display who has Access to an Object
+    /// Display who has Access to an ObjectIdFromProperty
     /// </summary>
     /// <param name="namespace"></param>
     /// <param name="object"></param>

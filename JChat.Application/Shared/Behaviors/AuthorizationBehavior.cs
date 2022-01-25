@@ -68,7 +68,7 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 
         foreach (var authorizeAttribute in authorizationAttributes)
         {
-            var objectId = request.GetType().GetProperty(authorizeAttribute.Object).GetValue(request);
+            var objectId = request.GetType().GetProperty(authorizeAttribute.ObjectIdFromProperty).GetValue(request);
 
             if (objectId == null)
             {

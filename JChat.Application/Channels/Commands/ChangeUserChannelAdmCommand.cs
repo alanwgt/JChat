@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JChat.Application.Channels.Commands;
 
-[Authorize(Relation = "ownership", Namespace = "channels", Object = "ChannelId")]
+[Authorize(Relation = "ownership", Namespace = "channels", ObjectIdFromProperty = "ChannelId")]
 public class ChangeUserChannelAdmCommand : WorkspaceScopedRequest<ChannelUserBriefDto>
 {
     public Guid ChannelId { get; set; }

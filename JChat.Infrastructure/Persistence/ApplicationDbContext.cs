@@ -6,8 +6,10 @@ using JChat.Domain.Entities.User;
 using JChat.Domain.Entities.Workspace;
 using JChat.Domain.Interfaces;
 using JChat.Domain.SeedWork;
+using JChat.Infrastructure.Exceptions;
 using JChat.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using IDomainEvent = JChat.Domain.Interfaces.IDomainEvent;
 
 namespace JChat.Infrastructure.Persistence;
@@ -94,12 +96,22 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .Where(domainEvent => !domainEvent.IsPublished)
             .ToArray();
 
-        // TODO: add try on unique key conflict code: 23505
-        var result = await base.SaveChangesAsync(cancellationToken);
+        try
+        {
+            var result = await base.SaveChangesAsync(cancellationToken);
+            await DispatchEvents(events);
 
-        await DispatchEvents(events);
-
-        return result;
+            return result;
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" } postgresException)
+        {
+            throw new ViolatesUniqueKeyConstraintException(
+                postgresException.ConstraintName,
+                postgresException.TableName,
+                postgresException.SqlState,
+                ex
+            );
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -1,6 +1,7 @@
 using JChat.Application.Shared.Exceptions;
 using JChat.Domain.Enums;
 using JChat.Domain.Exceptions;
+using JChat.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationException;
@@ -24,7 +25,8 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
             { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
             { typeof(DomainValidationException), HandleDomainValidationException },
-            { typeof(ApplicationException), HandleUnknownException }
+            { typeof(ApplicationException), HandleUnknownException },
+            { typeof(ViolatesUniqueKeyConstraintException), HandleUniqueKeyViolationException }
         };
     }
 
@@ -96,7 +98,6 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         };
 
         context.Result = new BadRequestObjectResult(details);
-
         context.ExceptionHandled = true;
     }
 
@@ -104,7 +105,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
     {
         var exception = (NotFoundException)context.Exception;
 
-        var details = new ProblemDetails()
+        var details = new ProblemDetails
         {
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
             Title = "The specified resource was not found.",
@@ -112,7 +113,6 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         };
 
         context.Result = new NotFoundObjectResult(details);
-
         context.ExceptionHandled = true;
     }
 
@@ -171,6 +171,26 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         };
 
         context.Result = new BadRequestObjectResult(details);
+
+        context.ExceptionHandled = true;
+    }
+
+    private static void HandleUniqueKeyViolationException(ExceptionContext context)
+    {
+        var exception = (ViolatesUniqueKeyConstraintException)context.Exception;
+
+        var details = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "The request violated an unique constraint in the database",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            Detail = exception.Message
+        };
+
+        context.Result = new BadRequestObjectResult(details)
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
 
         context.ExceptionHandled = true;
     }

@@ -9,7 +9,6 @@
     <ItemGroup>
       <Folder Include="Messages\Commands" />
       <Folder Include="Messages\Queries" />
-      <Folder Include="Users" />
     </ItemGroup>
 
     <ItemGroup>

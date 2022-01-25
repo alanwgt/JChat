@@ -14,6 +14,10 @@ export const Test = new ApiDeclaration.TestClient(
   'http://api.jchat.alanwgt.com',
   axios
 );
+export const Users = new ApiDeclaration.UsersClient(
+  'http://api.jchat.alanwgt.com',
+  axios
+);
 export const Workspaces = new ApiDeclaration.WorkspacesClient(
   'http://api.jchat.alanwgt.com',
   axios

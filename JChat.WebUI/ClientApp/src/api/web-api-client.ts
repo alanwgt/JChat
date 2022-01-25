@@ -626,6 +626,94 @@ export class TestClient implements ITestClient {
     }
 }
 
+export interface IUsersClient {
+    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfUserBriefDto>;
+}
+
+export class UsersClient implements IUsersClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+
+    }
+
+    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfUserBriefDto> {
+        let url_ = this.baseUrl + "/users?";
+        if (user_Id === null)
+            throw new Error("The parameter 'user_Id' cannot be null.");
+        else if (user_Id !== undefined)
+            url_ += "User.Id=" + encodeURIComponent("" + user_Id) + "&";
+        if (user_Username !== undefined && user_Username !== null)
+            url_ += "User.Username=" + encodeURIComponent("" + user_Username) + "&";
+        if (user_Firstname !== undefined && user_Firstname !== null)
+            url_ += "User.Firstname=" + encodeURIComponent("" + user_Firstname) + "&";
+        if (user_Lastname !== undefined && user_Lastname !== null)
+            url_ += "User.Lastname=" + encodeURIComponent("" + user_Lastname) + "&";
+        if (workspaceId === null)
+            throw new Error("The parameter 'workspaceId' cannot be null.");
+        else if (workspaceId !== undefined)
+            url_ += "WorkspaceId=" + encodeURIComponent("" + workspaceId) + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processList(_response);
+        });
+    }
+
+    protected processList(response: AxiosResponse): Promise<PaginatedListOfUserBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = PaginatedListOfUserBriefDto.fromJS(resultData200);
+            return Promise.resolve<PaginatedListOfUserBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PaginatedListOfUserBriefDto>(<any>null);
+    }
+}
+
 export interface IWorkspacesClient {
     list(pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfWorkspaceBriefDto>;
     create(command: CreateWorkspaceCommand): Promise<WorkspaceBriefDto>;
@@ -1045,6 +1133,9 @@ export interface IPaginatedListOfChannelUserBriefDto {
 }
 
 export class ChannelUserBriefDto implements IChannelUserBriefDto {
+    id?: string;
+    userId?: string;
+    channelId?: string;
 
     constructor(data?: IChannelUserBriefDto) {
         if (data) {
@@ -1056,6 +1147,11 @@ export class ChannelUserBriefDto implements IChannelUserBriefDto {
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userId = _data["userId"];
+            this.channelId = _data["channelId"];
+        }
     }
 
     static fromJS(data: any): ChannelUserBriefDto {
@@ -1067,11 +1163,17 @@ export class ChannelUserBriefDto implements IChannelUserBriefDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userId"] = this.userId;
+        data["channelId"] = this.channelId;
         return data;
     }
 }
 
 export interface IChannelUserBriefDto {
+    id?: string;
+    userId?: string;
+    channelId?: string;
 }
 
 export class PaginatedQueryOfChannelUserBriefDto implements IPaginatedQueryOfChannelUserBriefDto {
@@ -1230,6 +1332,114 @@ export interface IUser {
     username?: string;
     firstname?: string;
     lastname?: string;
+}
+
+export class PaginatedListOfUserBriefDto implements IPaginatedListOfUserBriefDto {
+    items?: UserBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(UserBriefDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfUserBriefDto {
+    items?: UserBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class UserBriefDto implements IUserBriefDto {
+    id?: string;
+    username?: string;
+    name?: string;
+
+    constructor(data?: IUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.username = _data["username"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): UserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["username"] = this.username;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IUserBriefDto {
+    id?: string;
+    username?: string;
+    name?: string;
 }
 
 export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspaceBriefDto {

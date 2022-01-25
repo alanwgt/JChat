@@ -12,6 +12,10 @@ public class ChannelUser : Entity
     [ForeignKey("ChannelId")] public Channel Channel { get; }
     [ForeignKey("UserId")] public User.User User { get; }
 
+    protected ChannelUser()
+    {
+    }
+
     public ChannelUser(Guid channelId, Guid userId, bool admin = false)
     {
         ChannelId = channelId;

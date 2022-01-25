@@ -12,6 +12,10 @@ public class Workspace : AuditableEntity
     public ICollection<UserWorkspace> UserWorkspaces { get; } = new List<UserWorkspace>();
     public ICollection<Channel.Channel> Channels { get; } = new List<Channel.Channel>();
 
+    protected Workspace()
+    {
+    }
+
     public Workspace(string name)
     {
         if (name.Length < 3) throw new DomainValidationException(ValidationExceptionType.MinLength, nameof(name), 3);

@@ -218,29 +218,40 @@ namespace JChat.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "channel",
+                name: "channels",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     workspace_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     is_private = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    created_by_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    last_modified_by_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    deleted_by_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_channel", x => x.id);
+                    table.PrimaryKey("pk_channels", x => x.id);
                     table.ForeignKey(
-                        name: "fk_channel_users_user_id",
-                        column: x => x.user_id,
+                        name: "fk_channels_users_created_by_id",
+                        column: x => x.created_by_id,
                         principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                     table.ForeignKey(
-                        name: "fk_channel_workspaces_workspace_id",
+                        name: "fk_channels_users_deleted_by_id",
+                        column: x => x.deleted_by_id,
+                        principalTable: "users",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_channels_users_last_modified_by_id",
+                        column: x => x.last_modified_by_id,
+                        principalTable: "users",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_channels_workspaces_workspace_id",
                         column: x => x.workspace_id,
                         principalTable: "workspaces",
                         principalColumn: "id",
@@ -310,9 +321,9 @@ namespace JChat.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_channel_users", x => x.id);
                     table.ForeignKey(
-                        name: "fk_channel_users_channel_channel_id",
+                        name: "fk_channel_users_channels_channel_id",
                         column: x => x.channel_id,
-                        principalTable: "channel",
+                        principalTable: "channels",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -324,24 +335,41 @@ namespace JChat.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_channel_user_id",
-                table: "channel",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_channel_workspace_id",
-                table: "channel",
-                column: "workspace_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_channel_users_channel_id",
+                name: "ix_channel_users_channel_id_user_id",
                 table: "channel_users",
-                column: "channel_id");
+                columns: new[] { "channel_id", "user_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_channel_users_user_id",
                 table: "channel_users",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_channels_created_by_id",
+                table: "channels",
+                column: "created_by_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_channels_deleted_by_id",
+                table: "channels",
+                column: "deleted_by_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_channels_last_modified_by_id",
+                table: "channels",
+                column: "last_modified_by_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_channels_name_workspace_id",
+                table: "channels",
+                columns: new[] { "name", "workspace_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_channels_workspace_id",
+                table: "channels",
+                column: "workspace_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_message_highlights_user_id",
@@ -448,7 +476,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                 name: "user_workspaces");
 
             migrationBuilder.DropTable(
-                name: "channel");
+                name: "channels");
 
             migrationBuilder.DropTable(
                 name: "messages");

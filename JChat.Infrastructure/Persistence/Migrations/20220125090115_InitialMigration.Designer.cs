@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JChat.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220115165841_InitialMigration")]
+    [Migration("20220125090115_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,41 +35,60 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by_id");
 
                     b.Property<bool>("IsPrivate")
                         .HasColumnType("boolean")
                         .HasColumnName("is_private");
 
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("name");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.Property<Guid>("WorkspaceId")
                         .HasColumnType("uuid")
                         .HasColumnName("workspace_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_channel");
+                        .HasName("pk_channels");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_channel_user_id");
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_channels_created_by_id");
+
+                    b.HasIndex("DeletedById")
+                        .HasDatabaseName("ix_channels_deleted_by_id");
+
+                    b.HasIndex("LastModifiedById")
+                        .HasDatabaseName("ix_channels_last_modified_by_id");
 
                     b.HasIndex("WorkspaceId")
-                        .HasDatabaseName("ix_channel_workspace_id");
+                        .HasDatabaseName("ix_channels_workspace_id");
 
-                    b.ToTable("channel", (string)null);
+                    b.HasIndex("Name", "WorkspaceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_channels_name_workspace_id");
+
+                    b.ToTable("channels", (string)null);
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Channel.ChannelUser", b =>
@@ -106,11 +125,12 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_channel_users");
 
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_channel_users_channel_id");
-
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_channel_users_user_id");
+
+                    b.HasIndex("ChannelId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_channel_users_channel_id_user_id");
 
                     b.ToTable("channel_users", (string)null);
                 });
@@ -578,21 +598,33 @@ namespace JChat.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("JChat.Domain.Entities.Channel.Channel", b =>
                 {
-                    b.HasOne("JChat.Domain.Entities.User.User", "User")
+                    b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_channel_users_user_id");
+                        .HasForeignKey("CreatedById")
+                        .HasConstraintName("fk_channels_users_created_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .HasConstraintName("fk_channels_users_deleted_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasConstraintName("fk_channels_users_last_modified_by_id");
 
                     b.HasOne("JChat.Domain.Entities.Workspace.Workspace", "Workspace")
-                        .WithMany()
+                        .WithMany("Channels")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_channel_workspaces_workspace_id");
+                        .HasConstraintName("fk_channels_workspaces_workspace_id");
 
-                    b.Navigation("User");
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
+                    b.Navigation("LastModifiedBy");
 
                     b.Navigation("Workspace");
                 });
@@ -604,7 +636,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_channel_users_channel_channel_id");
+                        .HasConstraintName("fk_channel_users_channels_channel_id");
 
                     b.HasOne("JChat.Domain.Entities.User.User", null)
                         .WithMany("Channels")
@@ -761,6 +793,8 @@ namespace JChat.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("JChat.Domain.Entities.Workspace.Workspace", b =>
                 {
+                    b.Navigation("Channels");
+
                     b.Navigation("UserWorkspaces");
                 });
 #pragma warning restore 612, 618

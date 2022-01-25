@@ -2,7 +2,7 @@ using JChat.Domain.SeedWork;
 
 namespace JChat.Domain.Entities.Channel;
 
-public class Channel : UserEntity
+public class Channel : AuditableEntity
 {
     public Guid WorkspaceId { get; protected set; }
     public string Name { get; protected set; }
@@ -10,6 +10,10 @@ public class Channel : UserEntity
 
     public Workspace.Workspace Workspace { get; protected set; }
     public ICollection<ChannelUser> Users { get; protected set; } = new List<ChannelUser>();
+
+    protected Channel()
+    {
+    }
 
     public Channel(Guid workspaceId, string name, bool isPrivate)
     {

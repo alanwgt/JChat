@@ -9,14 +9,14 @@ namespace JChat.WebUI.Controllers;
 public class WorkspacesController : ApiController
 {
     [HttpGet]
-    public async Task<PaginatedList<WorkspaceBriefDto>> List([FromQuery] GetWorkspacesQuery query)
+    public async Task<ActionResult<PaginatedList<WorkspaceBriefDto>>> List([FromQuery] GetWorkspacesQuery query)
     {
-        return await Mediator.Send(query);
+        return Ok(await Mediator.Send(query));
     }
 
     [HttpPost]
-    public async Task<WorkspaceBriefDto> Create([FromBody] CreateWorkspaceCommand command)
+    public async Task<ActionResult<WorkspaceBriefDto>> Create([FromBody] CreateWorkspaceCommand command)
     {
-        return await Mediator.Send(command);
+        return Ok(await Mediator.Send(command));
     }
 }

@@ -3,13 +3,11 @@ using AutoMapper.QueryableExtensions;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Models;
-using JChat.Application.Shared.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace JChat.Application.Workspaces.Queries;
 
-[Authorize]
 public class GetWorkspacesQuery : PaginatedQuery<WorkspaceBriefDto>
 {
 }

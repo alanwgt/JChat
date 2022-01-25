@@ -2,7 +2,7 @@
 import * as ApiDeclaration from './web-api-client';
 import axios from '@/services/axios.service';
 
-export const Channel = new ApiDeclaration.ChannelClient(
+export const Channels = new ApiDeclaration.ChannelsClient(
   'http://api.jchat.alanwgt.com',
   axios
 );

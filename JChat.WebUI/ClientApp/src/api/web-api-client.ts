@@ -11,11 +11,13 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, Ca
 
 import * as moment from 'moment';
 
-export interface IChannelClient {
-    create(command: CreateChannelCommand): Promise<FileResponse>;
+export interface IChannelsClient {
+    create(command: CreateChannelCommand): Promise<ChannelBriefDto>;
+    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
+    listUsers(channelId: string, query: GetChannelUsersQuery): Promise<PaginatedListOfChannelUserBriefDto>;
 }
 
-export class ChannelClient implements IChannelClient {
+export class ChannelsClient implements IChannelsClient {
     private instance: AxiosInstance;
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -28,20 +30,19 @@ export class ChannelClient implements IChannelClient {
 
     }
 
-    create(command: CreateChannelCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/channel";
+    create(command: CreateChannelCommand , cancelToken?: CancelToken | undefined): Promise<ChannelBriefDto> {
+        let url_ = this.baseUrl + "/channels";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(command);
 
         let options_ = <AxiosRequestConfig>{
             data: content_,
-            responseType: "blob",
             method: "POST",
             url: url_,
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             },
             cancelToken
         };
@@ -57,7 +58,7 @@ export class ChannelClient implements IChannelClient {
         });
     }
 
-    protected processCreate(response: AxiosResponse): Promise<FileResponse> {
+    protected processCreate(response: AxiosResponse): Promise<ChannelBriefDto> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -67,16 +68,143 @@ export class ChannelClient implements IChannelClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = ChannelBriefDto.fromJS(resultData200);
+            return Promise.resolve<ChannelBriefDto>(result200);
+
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<FileResponse>(<any>null);
+        return Promise.resolve<ChannelBriefDto>(<any>null);
+    }
+
+    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelBriefDto> {
+        let url_ = this.baseUrl + "/channels?";
+        if (user_Id === null)
+            throw new Error("The parameter 'user_Id' cannot be null.");
+        else if (user_Id !== undefined)
+            url_ += "User.Id=" + encodeURIComponent("" + user_Id) + "&";
+        if (user_Username !== undefined && user_Username !== null)
+            url_ += "User.Username=" + encodeURIComponent("" + user_Username) + "&";
+        if (user_Firstname !== undefined && user_Firstname !== null)
+            url_ += "User.Firstname=" + encodeURIComponent("" + user_Firstname) + "&";
+        if (user_Lastname !== undefined && user_Lastname !== null)
+            url_ += "User.Lastname=" + encodeURIComponent("" + user_Lastname) + "&";
+        if (workspaceId === null)
+            throw new Error("The parameter 'workspaceId' cannot be null.");
+        else if (workspaceId !== undefined)
+            url_ += "WorkspaceId=" + encodeURIComponent("" + workspaceId) + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processList(_response);
+        });
+    }
+
+    protected processList(response: AxiosResponse): Promise<PaginatedListOfChannelBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = PaginatedListOfChannelBriefDto.fromJS(resultData200);
+            return Promise.resolve<PaginatedListOfChannelBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PaginatedListOfChannelBriefDto>(<any>null);
+    }
+
+    listUsers(channelId: string, query: GetChannelUsersQuery , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelUserBriefDto> {
+        let url_ = this.baseUrl + "/channels/{ChannelId}/users";
+        if (channelId === undefined || channelId === null)
+            throw new Error("The parameter 'channelId' must be defined.");
+        url_ = url_.replace("{ChannelId}", encodeURIComponent("" + channelId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(query);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "GET",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processListUsers(_response);
+        });
+    }
+
+    protected processListUsers(response: AxiosResponse): Promise<PaginatedListOfChannelUserBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = PaginatedListOfChannelUserBriefDto.fromJS(resultData200);
+            return Promise.resolve<PaginatedListOfChannelUserBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PaginatedListOfChannelUserBriefDto>(<any>null);
     }
 }
 
@@ -152,6 +280,10 @@ export class HookClient implements IHookClient {
 export interface ITestClient {
     testMe(): Promise<FileResponse>;
     cmd(arg: string | null | undefined, user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined): Promise<FileResponse>;
+    write(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
+    read(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
+    expand(ns: string | null | undefined, oid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
+    list(ns: string | undefined, oid: string | null | undefined, relation: string | null | undefined, sid: string | null | undefined): Promise<FileResponse>;
 }
 
 export class TestClient implements ITestClient {
@@ -252,6 +384,226 @@ export class TestClient implements ITestClient {
     }
 
     protected processCmd(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    write(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/test/write?";
+        if (ns !== undefined && ns !== null)
+            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
+        if (oid !== undefined && oid !== null)
+            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
+        if (sid !== undefined && sid !== null)
+            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
+        if (relation !== undefined && relation !== null)
+            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            responseType: "blob",
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processWrite(_response);
+        });
+    }
+
+    protected processWrite(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    read(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/test/read?";
+        if (ns !== undefined && ns !== null)
+            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
+        if (oid !== undefined && oid !== null)
+            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
+        if (sid !== undefined && sid !== null)
+            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
+        if (relation !== undefined && relation !== null)
+            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            responseType: "blob",
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processRead(_response);
+        });
+    }
+
+    protected processRead(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    expand(ns: string | null | undefined, oid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/test/expand?";
+        if (ns !== undefined && ns !== null)
+            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
+        if (oid !== undefined && oid !== null)
+            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
+        if (relation !== undefined && relation !== null)
+            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            responseType: "blob",
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processExpand(_response);
+        });
+    }
+
+    protected processExpand(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    list(ns: string | undefined, oid: string | null | undefined, relation: string | null | undefined, sid: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/test/list?";
+        if (ns === null)
+            throw new Error("The parameter 'ns' cannot be null.");
+        else if (ns !== undefined)
+            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
+        if (oid !== undefined && oid !== null)
+            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
+        if (relation !== undefined && relation !== null)
+            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
+        if (sid !== undefined && sid !== null)
+            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            responseType: "blob",
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processList(_response);
+        });
+    }
+
+    protected processList(response: AxiosResponse): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -401,9 +753,11 @@ export class WorkspacesClient implements IWorkspacesClient {
     }
 }
 
-export class CreateChannelCommand implements ICreateChannelCommand {
+export class ChannelBriefDto implements IChannelBriefDto {
+    id?: string;
+    name?: string;
 
-    constructor(data?: ICreateChannelCommand) {
+    constructor(data?: IChannelBriefDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -413,6 +767,86 @@ export class CreateChannelCommand implements ICreateChannelCommand {
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): ChannelBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IChannelBriefDto {
+    id?: string;
+    name?: string;
+}
+
+export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScopedRequestOfChannelBriefDto {
+    user?: IUser;
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedRequestOfChannelBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+            this.workspaceId = _data["workspaceId"];
+        }
+    }
+
+    static fromJS(data: any): WorkspaceScopedRequestOfChannelBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new WorkspaceScopedRequestOfChannelBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        data["workspaceId"] = this.workspaceId;
+        return data;
+    }
+}
+
+export interface IWorkspaceScopedRequestOfChannelBriefDto {
+    user?: IUser;
+    workspaceId?: string;
+}
+
+export class CreateChannelCommand extends WorkspaceScopedRequestOfChannelBriefDto implements ICreateChannelCommand {
+    name?: string;
+    isPrivate?: boolean;
+
+    constructor(data?: ICreateChannelCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.isPrivate = _data["isPrivate"];
+        }
     }
 
     static fromJS(data: any): CreateChannelCommand {
@@ -424,11 +858,330 @@ export class CreateChannelCommand implements ICreateChannelCommand {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["isPrivate"] = this.isPrivate;
+        super.toJSON(data);
         return data;
     }
 }
 
-export interface ICreateChannelCommand {
+export interface ICreateChannelCommand extends IWorkspaceScopedRequestOfChannelBriefDto {
+    name?: string;
+    isPrivate?: boolean;
+}
+
+export abstract class IUser implements IIUser {
+    id?: string;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+
+    constructor(data?: IIUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.username = _data["username"];
+            this.firstname = _data["firstname"];
+            this.lastname = _data["lastname"];
+        }
+    }
+
+    static fromJS(data: any): IUser {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'IUser' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["username"] = this.username;
+        data["firstname"] = this.firstname;
+        data["lastname"] = this.lastname;
+        return data;
+    }
+}
+
+export interface IIUser {
+    id?: string;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+}
+
+export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBriefDto {
+    items?: ChannelBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfChannelBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(ChannelBriefDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfChannelBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfChannelBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfChannelBriefDto {
+    items?: ChannelBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChannelUserBriefDto {
+    items?: ChannelUserBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfChannelUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(ChannelUserBriefDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfChannelUserBriefDto {
+    items?: ChannelUserBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class ChannelUserBriefDto implements IChannelUserBriefDto {
+
+    constructor(data?: IChannelUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): ChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IChannelUserBriefDto {
+}
+
+export class PaginatedQueryOfChannelUserBriefDto implements IPaginatedQueryOfChannelUserBriefDto {
+    pageNumber?: number;
+    pageSize?: number;
+
+    constructor(data?: IPaginatedQueryOfChannelUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageNumber = _data["pageNumber"];
+            this.pageSize = _data["pageSize"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedQueryOfChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedQueryOfChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageNumber"] = this.pageNumber;
+        data["pageSize"] = this.pageSize;
+        return data;
+    }
+}
+
+export interface IPaginatedQueryOfChannelUserBriefDto {
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export class WorkspaceScopedPaginatedRequestOfChannelUserBriefDto extends PaginatedQueryOfChannelUserBriefDto implements IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
+    user?: IUser;
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+            this.workspaceId = _data["workspaceId"];
+        }
+    }
+
+    static fromJS(data: any): WorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new WorkspaceScopedPaginatedRequestOfChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        data["workspaceId"] = this.workspaceId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto extends IPaginatedQueryOfChannelUserBriefDto {
+    user?: IUser;
+    workspaceId?: string;
+}
+
+export class GetChannelUsersQuery extends WorkspaceScopedPaginatedRequestOfChannelUserBriefDto implements IGetChannelUsersQuery {
+    channelId?: string;
+
+    constructor(data?: IGetChannelUsersQuery) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.channelId = _data["channelId"];
+        }
+    }
+
+    static fromJS(data: any): GetChannelUsersQuery {
+        data = typeof data === 'object' ? data : {};
+        let result = new GetChannelUsersQuery();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channelId"] = this.channelId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IGetChannelUsersQuery extends IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
+    channelId?: string;
 }
 
 export class User implements IUser {

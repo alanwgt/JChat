@@ -17,7 +17,7 @@ public static class DotEnv
             if (parts.Length != 2 || parts[0][0] == '#')
                 continue;
 
-            Environment.SetEnvironmentVariable(parts[0], parts[1]);
+            Environment.SetEnvironmentVariable(parts[0], parts[1].Replace("\"", ""));
         }
     }
 }

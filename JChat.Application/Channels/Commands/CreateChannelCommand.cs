@@ -4,11 +4,13 @@ using JChat.Application.Channels.Queries;
 using JChat.Application.Enums;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Interfaces;
+using JChat.Application.Shared.Security;
 using JChat.Domain.Entities.Channel;
 using MediatR;
 
 namespace JChat.Application.Channels.Commands;
 
+[Authorize(Namespace = "workspaces", Object = "WorkspaceId", Relation = "write")]
 public class CreateChannelCommand : WorkspaceScopedRequest<ChannelBriefDto>
 {
     public string Name { get; set; }
@@ -45,16 +47,19 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
 
     public async Task<ChannelBriefDto> Handle(CreateChannelCommand request, CancellationToken cancellationToken)
     {
-        var channel = new Channel(request.WorkspaceId, request.Name, request.IsPrivate);
         await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-        var userId = request.User.Id;
-        var cUser = channel.AddUser(userId, true);
-        var ns = AuthzNamespace.Channels.Str();
-        var channelId = channel.Id.ToString();
 
         try
         {
+            var userId = request.User.Id;
+            var channel = new Channel(request.WorkspaceId, request.Name, request.IsPrivate);
+
             await _context.Channels.AddAsync(channel, cancellationToken);
+
+            var cUser = channel.AddUser(userId, true);
+            var ns = AuthzNamespace.Channels.Str();
+            var channelId = channel.Id.ToString();
+
             await _context.ChannelUsers.AddAsync(cUser, cancellationToken);
 
             await _authorization.Authorize(
@@ -109,6 +114,7 @@ public class CreateChannelCommandHandler : IRequestHandler<CreateChannelCommand,
                 cancellationToken
             );
 
+            await _context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return _mapper.Map<ChannelBriefDto>(channel);

@@ -78,7 +78,7 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 
             var authzRequest = _authorization.Can(
                 authorizeAttribute.Namespace,
-                (string) objectId,
+                objectId.ToString(),
                 authorizeAttribute.Relation,
                 authorizeAttribute.Subject ?? user.Id.ToString(),
                 cancellationToken

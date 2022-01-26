@@ -19,13 +19,16 @@ public class ChannelsController : ApiController
     public async Task<ActionResult<PaginatedList<ChannelBriefDto>>> List([FromQuery] PaginationData data)
         => Ok(await Mediator.Send(new GetChannelsQuery().WithPaginationData(data)));
 
-    [HttpGet("{ChannelId:guid}/users")]
+    [HttpGet("{channelId:guid}/users")]
     public async Task<ActionResult<PaginatedList<ChannelUserBriefDto>>> Users(Guid channelId,
         [FromQuery] PaginationData paginationData)
         => Ok(
             await Mediator.Send(new GetChannelUsersQuery { ChannelId = channelId }.WithPaginationData(paginationData)));
 
-    [HttpPost("{ChannelId:guid}/messages")]
-    public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command)
-        => Ok(await Mediator.Send(command));
+    [HttpPost("{channelId:guid}/messages")]
+    public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command, Guid channelId)
+    {
+        command.ChannelId = channelId;
+        return Ok(await Mediator.Send(command));
+    }
 }

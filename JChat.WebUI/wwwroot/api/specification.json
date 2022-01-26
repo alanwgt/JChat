@@ -188,6 +188,60 @@
         }
       }
     },
+    "/channels/{channelId}/users/{userId}/admin": {
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "operationId": "Channels_SetAdmin",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 3
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUserChannelAdmCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelUserBriefDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channels/{channelId}/messages": {
       "post": {
         "tags": [
@@ -662,6 +716,30 @@
             "$ref": "#/components/schemas/IUser"
           }
         }
+      },
+      "ChangeUserChannelAdmCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfChannelUserBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "channelId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "admin": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
       },
       "MessageBriefDto": {
         "type": "object",

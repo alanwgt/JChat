@@ -82,6 +82,7 @@ export interface IChannelsClient {
     list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
     users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelUserBriefDto>;
     addMember(command: AddUserToChannelCommand, channelId: string): Promise<ChannelUserBriefDto>;
+    setAdmin(command: ChangeUserChannelAdmCommand, channelId: string, userId: string): Promise<ChannelUserBriefDto>;
     sendMessage(command: CreateMessageCommand, channelId: string): Promise<MessageBriefDto>;
 }
 
@@ -297,6 +298,64 @@ export class ChannelsClient implements IChannelsClient {
     }
 
     protected processAddMember(response: AxiosResponse): Promise<ChannelUserBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = ChannelUserBriefDto.fromJS(resultData200);
+            return Promise.resolve<ChannelUserBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ChannelUserBriefDto>(<any>null);
+    }
+
+    setAdmin(command: ChangeUserChannelAdmCommand, channelId: string, userId: string , cancelToken?: CancelToken | undefined): Promise<ChannelUserBriefDto> {
+        let url_ = this.baseUrl + "/channels/{channelId}/users/{userId}/admin";
+        if (channelId === undefined || channelId === null)
+            throw new Error("The parameter 'channelId' must be defined.");
+        url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSetAdmin(_response);
+        });
+    }
+
+    protected processSetAdmin(response: AxiosResponse): Promise<ChannelUserBriefDto> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -1273,6 +1332,47 @@ export class AddUserToChannelCommand extends WorkspaceScopedRequestOfChannelUser
 export interface IAddUserToChannelCommand extends IWorkspaceScopedRequestOfChannelUserBriefDto {
     channelId?: string;
     userId?: string;
+}
+
+export class ChangeUserChannelAdmCommand extends WorkspaceScopedRequestOfChannelUserBriefDto implements IChangeUserChannelAdmCommand {
+    channelId?: string;
+    userId?: string;
+    admin?: boolean;
+
+    constructor(data?: IChangeUserChannelAdmCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.channelId = _data["channelId"];
+            this.userId = _data["userId"];
+            this.admin = _data["admin"];
+        }
+    }
+
+    static fromJS(data: any): ChangeUserChannelAdmCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChangeUserChannelAdmCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channelId"] = this.channelId;
+        data["userId"] = this.userId;
+        data["admin"] = this.admin;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IChangeUserChannelAdmCommand extends IWorkspaceScopedRequestOfChannelUserBriefDto {
+    channelId?: string;
+    userId?: string;
+    admin?: boolean;
 }
 
 export class MessageBriefDto implements IMessageBriefDto {

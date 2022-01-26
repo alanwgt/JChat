@@ -32,6 +32,15 @@ public class ChannelsController : ApiController
         return Ok(await Mediator.Send(command));
     }
 
+    [HttpPost("{channelId:guid}/users/{userId:guid}/admin")]
+    public async Task<ActionResult<ChannelUserBriefDto>> SetAdmin(ChangeUserChannelAdmCommand command, Guid channelId,
+        Guid userId)
+    {
+        command.ChannelId = channelId;
+        command.UserId = userId;
+        return Ok(await Mediator.Send(command));
+    }
+
     [HttpPost("{channelId:guid}/messages")]
     public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command, Guid channelId)
     {

@@ -2,15 +2,15 @@
 import * as ApiDeclaration from './web-api-client';
 import axios from '@/services/axios.service';
 
+export const Boot = new ApiDeclaration.BootClient(
+  'http://api.jchat.alanwgt.com',
+  axios
+);
 export const Channels = new ApiDeclaration.ChannelsClient(
   'http://api.jchat.alanwgt.com',
   axios
 );
 export const Hook = new ApiDeclaration.HookClient(
-  'http://api.jchat.alanwgt.com',
-  axios
-);
-export const Test = new ApiDeclaration.TestClient(
   'http://api.jchat.alanwgt.com',
   axios
 );

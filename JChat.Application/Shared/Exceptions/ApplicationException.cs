@@ -2,6 +2,8 @@ namespace JChat.Application.Shared.Exceptions;
 
 public class ApplicationException : Exception
 {
+    public string? Details { get; set; }
+
     public ApplicationException()
     {
     }

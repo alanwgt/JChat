@@ -25,7 +25,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
             { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
             { typeof(DomainValidationException), HandleDomainValidationException },
-            { typeof(ApplicationException), HandleUnknownException },
+            { typeof(ApplicationException), HandleApplicationException },
             { typeof(ViolatesUniqueKeyConstraintException), HandleUniqueKeyViolationException }
         };
     }
@@ -190,6 +190,30 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         context.Result = new BadRequestObjectResult(details)
         {
             StatusCode = StatusCodes.Status400BadRequest
+        };
+
+        context.ExceptionHandled = true;
+    }
+
+    private static void HandleApplicationException(ExceptionContext context)
+    {
+        var exception = (ApplicationException)context.Exception;
+
+        var details = new ProblemDetails
+        {
+            Status = StatusCodes.Status409Conflict,
+            Title = "An error occurred while processing your request.",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+        };
+
+        if (exception.Details != null)
+        {
+            details.Detail = exception.Details;
+        }
+
+        context.Result = new ObjectResult(details)
+        {
+            StatusCode = StatusCodes.Status409Conflict
         };
 
         context.ExceptionHandled = true;

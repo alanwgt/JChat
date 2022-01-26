@@ -4,12 +4,13 @@ import { PLACEMENT, StatefulPopover, TRIGGER_TYPE } from 'baseui/popover';
 import { StatefulMenu } from 'baseui/menu';
 import { ChevronDown, ChevronUp } from 'baseui/icon';
 import { Button, KIND, SIZE } from 'baseui/button';
-import { Label4 } from 'baseui/typography';
+import { LabelXSmall } from 'baseui/typography';
 import { useTranslation } from 'react-i18next';
 
 import { useUser } from '@/providers/userContext';
 import { useAuth } from '@/providers/authContext';
 import { deselectWorkspace } from '@/store/workspace/workspace.actions';
+import Icon from '@/components/typography/Icon';
 
 const MenuActionType = {
   Logout: 0,
@@ -55,9 +56,10 @@ const UserMenu = ({ changeWorkspace }) => {
         />
       )}
     >
-      <Button kind={KIND.tertiary} size={SIZE.mini}>
-        <Label4>{username}</Label4>
-        {isOpen ? <ChevronUp size={28} /> : <ChevronDown size={28} />}
+      <Button kind={KIND.tertiary} size={SIZE.mini} $style={{ gap: '2.5px' }}>
+        <Icon name='user-alt-1' />
+        <LabelXSmall>{username}</LabelXSmall>
+        {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
       </Button>
     </StatefulPopover>
   );

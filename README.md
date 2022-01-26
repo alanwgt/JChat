@@ -41,6 +41,14 @@ O arquivo de configuração do Keto pode ser encontradro em [JChat.Infrastructur
 
 [Documentação de referência](https://www.ory.sh/keto/docs).
 
+## Docs
+
+### NSwag
+
+- [ClientGeneratorBaseSettings](https://github.com/RicoSuter/NSwag/wiki/ClientGeneratorBaseSettings);
+- [TypescriptGeneratorSettings](https://github.com/RicoSuter/NJsonSchema/wiki/TypeScriptGeneratorSettings);
+- [NJsonSchema.CodeGeneration.TypeScript](https://apimundo.com/organizations/nuget-org/nuget-feeds/public/packages/NJsonSchema.CodeGeneration.TypeScript/versions/latest?type=NJsonSchema.CodeGeneration.TypeScript.TypeScriptGeneratorSettings&namespace=NJsonSchema.CodeGeneration.TypeScript&assembly=netstandard-2.0);
+
 # TODO:
 
 - [ ] Soft deletes filter;

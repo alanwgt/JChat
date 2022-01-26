@@ -473,6 +473,137 @@
           }
         }
       }
+    },
+    "/workspaces/invite": {
+      "post": {
+        "tags": [
+          "Workspaces"
+        ],
+        "operationId": "Workspaces_Invite",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteToWorkspaceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspaces/accept-invite": {
+      "post": {
+        "tags": [
+          "Workspaces"
+        ],
+        "operationId": "Workspaces_AcceptInvite",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptWorkspaceInviteCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceBriefDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspaces/banish": {
+      "post": {
+        "tags": [
+          "Workspaces"
+        ],
+        "operationId": "Workspaces_Banish",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BanishUserFromWorkspaceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspaces/reject-invite": {
+      "post": {
+        "tags": [
+          "Workspaces"
+        ],
+        "operationId": "Workspaces_RejectInvite",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectWorkspaceInviteCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -498,6 +629,12 @@
             "items": {
               "$ref": "#/components/schemas/IdNameDto"
             }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KetoInternalRelationTuple"
+            }
           }
         }
       },
@@ -511,6 +648,78 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "KetoInternalRelationTuple": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "required": [
+          "namespace",
+          "object",
+          "relation"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "nullable": true
+          },
+          "object": {
+            "type": "string",
+            "nullable": true
+          },
+          "relation": {
+            "type": "string",
+            "nullable": true
+          },
+          "subjectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "subjectSet": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/KetoSubjectSet"
+              }
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          }
+        }
+      },
+      "KetoSubjectSet": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "required": [
+          "namespace",
+          "object",
+          "relation"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "nullable": true
+          },
+          "object": {
+            "type": "string",
+            "nullable": true
+          },
+          "relation": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
           }
         }
       },
@@ -922,6 +1131,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "joined": {
+            "type": "boolean"
           }
         }
       },
@@ -933,6 +1145,112 @@
             "type": "string"
           }
         }
+      },
+      "InviteToWorkspaceCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfUnit"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "WorkspaceScopedRequestOfUnit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfUnit"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "workspaceId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "BaseRequestOfUnit": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/IUser"
+          }
+        }
+      },
+      "AcceptWorkspaceInviteCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfWorkspaceBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "invitationId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "BaseRequestOfWorkspaceBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/IUser"
+          }
+        }
+      },
+      "BanishUserFromWorkspaceCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfUnit"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "RejectWorkspaceInviteCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfUnit"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "invitationId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
       }
     }
   }

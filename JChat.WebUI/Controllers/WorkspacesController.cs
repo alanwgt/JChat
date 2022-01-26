@@ -19,4 +19,29 @@ public class WorkspacesController : ApiController
     {
         return Ok(await Mediator.Send(command));
     }
+
+    [HttpPost("invite")]
+    public async Task<IActionResult> Invite(InviteToWorkspaceCommand command)
+    {
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpPost("accept-invite")]
+    public async Task<ActionResult<WorkspaceBriefDto>> AcceptInvite(AcceptWorkspaceInviteCommand command)
+        => Ok(await Mediator.Send(command));
+
+    [HttpPost("banish")]
+    public async Task<IActionResult> Banish(BanishUserFromWorkspaceCommand command)
+    {
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpPost("reject-invite")]
+    public async Task<IActionResult> RejectInvite(RejectWorkspaceInviteCommand command)
+    {
+        await Mediator.Send(command);
+        return NoContent();
+    }
 }

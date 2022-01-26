@@ -595,6 +595,10 @@ export class UsersClient implements IUsersClient {
 export interface IWorkspacesClient {
     list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfWorkspaceBriefDto>;
     create(command: CreateWorkspaceCommand): Promise<WorkspaceBriefDto>;
+    invite(command: InviteToWorkspaceCommand): Promise<FileResponse>;
+    acceptInvite(command: AcceptWorkspaceInviteCommand): Promise<WorkspaceBriefDto>;
+    banish(command: BanishUserFromWorkspaceCommand): Promise<FileResponse>;
+    rejectInvite(command: RejectWorkspaceInviteCommand): Promise<FileResponse>;
 }
 
 export class WorkspacesClient implements IWorkspacesClient {
@@ -717,39 +721,224 @@ export class WorkspacesClient implements IWorkspacesClient {
         }
         return Promise.resolve<WorkspaceBriefDto>(<any>null);
     }
+
+    invite(command: InviteToWorkspaceCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/workspaces/invite";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            responseType: "blob",
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processInvite(_response);
+        });
+    }
+
+    protected processInvite(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    acceptInvite(command: AcceptWorkspaceInviteCommand , cancelToken?: CancelToken | undefined): Promise<WorkspaceBriefDto> {
+        let url_ = this.baseUrl + "/workspaces/accept-invite";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAcceptInvite(_response);
+        });
+    }
+
+    protected processAcceptInvite(response: AxiosResponse): Promise<WorkspaceBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = WorkspaceBriefDto.fromJS(resultData200);
+            return Promise.resolve<WorkspaceBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<WorkspaceBriefDto>(<any>null);
+    }
+
+    banish(command: BanishUserFromWorkspaceCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/workspaces/banish";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            responseType: "blob",
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processBanish(_response);
+        });
+    }
+
+    protected processBanish(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
+
+    rejectInvite(command: RejectWorkspaceInviteCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/workspaces/reject-invite";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            responseType: "blob",
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processRejectInvite(_response);
+        });
+    }
+
+    protected processRejectInvite(response: AxiosResponse): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
 }
 
 export class BootDto implements IBootDto {
     messagePriorities?: IdNameDto[];
     messageReactions?: IdNameDto[];
     messageTypes?: IdNameDto[];
+    permissions?: KetoInternalRelationTuple[];
 
     constructor(data?: IBootDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
-            }
-            if (data.messagePriorities) {
-                this.messagePriorities = [];
-                for (let i = 0; i < data.messagePriorities.length; i++) {
-                    let item = data.messagePriorities[i];
-                    this.messagePriorities[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
-                }
-            }
-            if (data.messageReactions) {
-                this.messageReactions = [];
-                for (let i = 0; i < data.messageReactions.length; i++) {
-                    let item = data.messageReactions[i];
-                    this.messageReactions[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
-                }
-            }
-            if (data.messageTypes) {
-                this.messageTypes = [];
-                for (let i = 0; i < data.messageTypes.length; i++) {
-                    let item = data.messageTypes[i];
-                    this.messageTypes[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
-                }
             }
         }
     }
@@ -770,6 +959,11 @@ export class BootDto implements IBootDto {
                 this.messageTypes = [] as any;
                 for (let item of _data["messageTypes"])
                     this.messageTypes!.push(IdNameDto.fromJS(item));
+            }
+            if (Array.isArray(_data["permissions"])) {
+                this.permissions = [] as any;
+                for (let item of _data["permissions"])
+                    this.permissions!.push(KetoInternalRelationTuple.fromJS(item));
             }
         }
     }
@@ -798,14 +992,20 @@ export class BootDto implements IBootDto {
             for (let item of this.messageTypes)
                 data["messageTypes"].push(item.toJSON());
         }
+        if (Array.isArray(this.permissions)) {
+            data["permissions"] = [];
+            for (let item of this.permissions)
+                data["permissions"].push(item.toJSON());
+        }
         return data;
     }
 }
 
 export interface IBootDto {
-    messagePriorities?: IIdNameDto[];
-    messageReactions?: IIdNameDto[];
-    messageTypes?: IIdNameDto[];
+    messagePriorities?: IdNameDto[];
+    messageReactions?: IdNameDto[];
+    messageTypes?: IdNameDto[];
+    permissions?: KetoInternalRelationTuple[];
 }
 
 export class IdNameDto implements IIdNameDto {
@@ -846,6 +1046,134 @@ export class IdNameDto implements IIdNameDto {
 export interface IIdNameDto {
     id?: string;
     name?: string;
+}
+
+export class KetoInternalRelationTuple implements IKetoInternalRelationTuple {
+    namespace!: string | undefined;
+    object!: string | undefined;
+    relation!: string | undefined;
+    subjectId?: string | undefined;
+    subjectSet?: KetoSubjectSet | undefined;
+    additionalProperties?: { [key: string]: any; } | undefined;
+
+    constructor(data?: IKetoInternalRelationTuple) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.namespace = _data["namespace"];
+            this.object = _data["object"];
+            this.relation = _data["relation"];
+            this.subjectId = _data["subjectId"];
+            this.subjectSet = _data["subjectSet"] ? KetoSubjectSet.fromJS(_data["subjectSet"]) : <any>undefined;
+            if (_data["additionalProperties"]) {
+                this.additionalProperties = {} as any;
+                for (let key in _data["additionalProperties"]) {
+                    if (_data["additionalProperties"].hasOwnProperty(key))
+                        (<any>this.additionalProperties)![key] = _data["additionalProperties"][key];
+                }
+            }
+        }
+    }
+
+    static fromJS(data: any): KetoInternalRelationTuple {
+        data = typeof data === 'object' ? data : {};
+        let result = new KetoInternalRelationTuple();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["namespace"] = this.namespace;
+        data["object"] = this.object;
+        data["relation"] = this.relation;
+        data["subjectId"] = this.subjectId;
+        data["subjectSet"] = this.subjectSet ? this.subjectSet.toJSON() : <any>undefined;
+        if (this.additionalProperties) {
+            data["additionalProperties"] = {};
+            for (let key in this.additionalProperties) {
+                if (this.additionalProperties.hasOwnProperty(key))
+                    (<any>data["additionalProperties"])[key] = this.additionalProperties[key];
+            }
+        }
+        return data;
+    }
+}
+
+export interface IKetoInternalRelationTuple {
+    namespace: string | undefined;
+    object: string | undefined;
+    relation: string | undefined;
+    subjectId?: string | undefined;
+    subjectSet?: KetoSubjectSet | undefined;
+    additionalProperties?: { [key: string]: any; } | undefined;
+}
+
+export class KetoSubjectSet implements IKetoSubjectSet {
+    namespace!: string | undefined;
+    object!: string | undefined;
+    relation!: string | undefined;
+    additionalProperties?: { [key: string]: any; } | undefined;
+
+    constructor(data?: IKetoSubjectSet) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.namespace = _data["namespace"];
+            this.object = _data["object"];
+            this.relation = _data["relation"];
+            if (_data["additionalProperties"]) {
+                this.additionalProperties = {} as any;
+                for (let key in _data["additionalProperties"]) {
+                    if (_data["additionalProperties"].hasOwnProperty(key))
+                        (<any>this.additionalProperties)![key] = _data["additionalProperties"][key];
+                }
+            }
+        }
+    }
+
+    static fromJS(data: any): KetoSubjectSet {
+        data = typeof data === 'object' ? data : {};
+        let result = new KetoSubjectSet();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["namespace"] = this.namespace;
+        data["object"] = this.object;
+        data["relation"] = this.relation;
+        if (this.additionalProperties) {
+            data["additionalProperties"] = {};
+            for (let key in this.additionalProperties) {
+                if (this.additionalProperties.hasOwnProperty(key))
+                    (<any>data["additionalProperties"])[key] = this.additionalProperties[key];
+            }
+        }
+        return data;
+    }
+}
+
+export interface IKetoSubjectSet {
+    namespace: string | undefined;
+    object: string | undefined;
+    relation: string | undefined;
+    additionalProperties?: { [key: string]: any; } | undefined;
 }
 
 export class ChannelBriefDto implements IChannelBriefDto {
@@ -897,7 +1225,6 @@ export class BaseRequestOfChannelBriefDto implements IBaseRequestOfChannelBriefD
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
         }
     }
 
@@ -922,7 +1249,7 @@ export class BaseRequestOfChannelBriefDto implements IBaseRequestOfChannelBriefD
 }
 
 export interface IBaseRequestOfChannelBriefDto {
-    user?: IIUser;
+    user?: IUser;
 }
 
 export class WorkspaceScopedRequestOfChannelBriefDto extends BaseRequestOfChannelBriefDto implements IWorkspaceScopedRequestOfChannelBriefDto {
@@ -1055,13 +1382,6 @@ export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBr
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            if (data.items) {
-                this.items = [];
-                for (let i = 0; i < data.items.length; i++) {
-                    let item = data.items[i];
-                    this.items[i] = item && !(<any>item).toJSON ? new ChannelBriefDto(item) : <ChannelBriefDto>item;
-                }
-            }
         }
     }
 
@@ -1104,7 +1424,7 @@ export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBr
 }
 
 export interface IPaginatedListOfChannelBriefDto {
-    items?: IChannelBriefDto[];
+    items?: ChannelBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1125,13 +1445,6 @@ export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChann
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
-            }
-            if (data.items) {
-                this.items = [];
-                for (let i = 0; i < data.items.length; i++) {
-                    let item = data.items[i];
-                    this.items[i] = item && !(<any>item).toJSON ? new ChannelUserBriefDto(item) : <ChannelUserBriefDto>item;
-                }
             }
         }
     }
@@ -1175,7 +1488,7 @@ export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChann
 }
 
 export interface IPaginatedListOfChannelUserBriefDto {
-    items?: IChannelUserBriefDto[];
+    items?: ChannelUserBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1236,7 +1549,6 @@ export class BaseRequestOfChannelUserBriefDto implements IBaseRequestOfChannelUs
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
         }
     }
 
@@ -1261,7 +1573,7 @@ export class BaseRequestOfChannelUserBriefDto implements IBaseRequestOfChannelUs
 }
 
 export interface IBaseRequestOfChannelUserBriefDto {
-    user?: IIUser;
+    user?: IUser;
 }
 
 export class WorkspaceScopedRequestOfChannelUserBriefDto extends BaseRequestOfChannelUserBriefDto implements IWorkspaceScopedRequestOfChannelUserBriefDto {
@@ -1414,7 +1726,6 @@ export class BaseRequestOfMessageBriefDto implements IBaseRequestOfMessageBriefD
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
         }
     }
 
@@ -1439,7 +1750,7 @@ export class BaseRequestOfMessageBriefDto implements IBaseRequestOfMessageBriefD
 }
 
 export interface IBaseRequestOfMessageBriefDto {
-    user?: IIUser;
+    user?: IUser;
 }
 
 export class WorkspaceScopedRequestOfMessageBriefDto extends BaseRequestOfMessageBriefDto implements IWorkspaceScopedRequestOfMessageBriefDto {
@@ -1615,13 +1926,6 @@ export class PaginatedListOfUserBriefDto implements IPaginatedListOfUserBriefDto
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            if (data.items) {
-                this.items = [];
-                for (let i = 0; i < data.items.length; i++) {
-                    let item = data.items[i];
-                    this.items[i] = item && !(<any>item).toJSON ? new UserBriefDto(item) : <UserBriefDto>item;
-                }
-            }
         }
     }
 
@@ -1664,7 +1968,7 @@ export class PaginatedListOfUserBriefDto implements IPaginatedListOfUserBriefDto
 }
 
 export interface IPaginatedListOfUserBriefDto {
-    items?: IUserBriefDto[];
+    items?: UserBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1730,13 +2034,6 @@ export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspa
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-            if (data.items) {
-                this.items = [];
-                for (let i = 0; i < data.items.length; i++) {
-                    let item = data.items[i];
-                    this.items[i] = item && !(<any>item).toJSON ? new WorkspaceBriefDto(item) : <WorkspaceBriefDto>item;
-                }
-            }
         }
     }
 
@@ -1779,7 +2076,7 @@ export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspa
 }
 
 export interface IPaginatedListOfWorkspaceBriefDto {
-    items?: IWorkspaceBriefDto[];
+    items?: WorkspaceBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1790,6 +2087,7 @@ export interface IPaginatedListOfWorkspaceBriefDto {
 export class WorkspaceBriefDto implements IWorkspaceBriefDto {
     id?: string;
     name?: string;
+    joined?: boolean;
 
     constructor(data?: IWorkspaceBriefDto) {
         if (data) {
@@ -1804,6 +2102,7 @@ export class WorkspaceBriefDto implements IWorkspaceBriefDto {
         if (_data) {
             this.id = _data["id"];
             this.name = _data["name"];
+            this.joined = _data["joined"];
         }
     }
 
@@ -1818,6 +2117,7 @@ export class WorkspaceBriefDto implements IWorkspaceBriefDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
+        data["joined"] = this.joined;
         return data;
     }
 }
@@ -1825,6 +2125,7 @@ export class WorkspaceBriefDto implements IWorkspaceBriefDto {
 export interface IWorkspaceBriefDto {
     id?: string;
     name?: string;
+    joined?: boolean;
 }
 
 export class CreateWorkspaceCommand implements ICreateWorkspaceCommand {
@@ -1861,6 +2162,247 @@ export class CreateWorkspaceCommand implements ICreateWorkspaceCommand {
 
 export interface ICreateWorkspaceCommand {
     name?: string;
+}
+
+export class BaseRequestOfUnit implements IBaseRequestOfUnit {
+    user?: IUser;
+
+    constructor(data?: IBaseRequestOfUnit) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseRequestOfUnit {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseRequestOfUnit();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseRequestOfUnit {
+    user?: IUser;
+}
+
+export class WorkspaceScopedRequestOfUnit extends BaseRequestOfUnit implements IWorkspaceScopedRequestOfUnit {
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedRequestOfUnit) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+        }
+    }
+
+    static fromJS(data: any): WorkspaceScopedRequestOfUnit {
+        data = typeof data === 'object' ? data : {};
+        let result = new WorkspaceScopedRequestOfUnit();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWorkspaceScopedRequestOfUnit extends IBaseRequestOfUnit {
+    workspaceId?: string;
+}
+
+export class InviteToWorkspaceCommand extends WorkspaceScopedRequestOfUnit implements IInviteToWorkspaceCommand {
+    userId?: string;
+
+    constructor(data?: IInviteToWorkspaceCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.userId = _data["userId"];
+        }
+    }
+
+    static fromJS(data: any): InviteToWorkspaceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new InviteToWorkspaceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IInviteToWorkspaceCommand extends IWorkspaceScopedRequestOfUnit {
+    userId?: string;
+}
+
+export class BaseRequestOfWorkspaceBriefDto implements IBaseRequestOfWorkspaceBriefDto {
+    user?: IUser;
+
+    constructor(data?: IBaseRequestOfWorkspaceBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseRequestOfWorkspaceBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseRequestOfWorkspaceBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseRequestOfWorkspaceBriefDto {
+    user?: IUser;
+}
+
+export class AcceptWorkspaceInviteCommand extends BaseRequestOfWorkspaceBriefDto implements IAcceptWorkspaceInviteCommand {
+    invitationId?: string;
+
+    constructor(data?: IAcceptWorkspaceInviteCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.invitationId = _data["invitationId"];
+        }
+    }
+
+    static fromJS(data: any): AcceptWorkspaceInviteCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AcceptWorkspaceInviteCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["invitationId"] = this.invitationId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IAcceptWorkspaceInviteCommand extends IBaseRequestOfWorkspaceBriefDto {
+    invitationId?: string;
+}
+
+export class BanishUserFromWorkspaceCommand extends WorkspaceScopedRequestOfUnit implements IBanishUserFromWorkspaceCommand {
+    userId?: string;
+    reason?: string;
+
+    constructor(data?: IBanishUserFromWorkspaceCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.userId = _data["userId"];
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): BanishUserFromWorkspaceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new BanishUserFromWorkspaceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["reason"] = this.reason;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IBanishUserFromWorkspaceCommand extends IWorkspaceScopedRequestOfUnit {
+    userId?: string;
+    reason?: string;
+}
+
+export class RejectWorkspaceInviteCommand extends BaseRequestOfUnit implements IRejectWorkspaceInviteCommand {
+    invitationId?: string;
+
+    constructor(data?: IRejectWorkspaceInviteCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.invitationId = _data["invitationId"];
+        }
+    }
+
+    static fromJS(data: any): RejectWorkspaceInviteCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new RejectWorkspaceInviteCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["invitationId"] = this.invitationId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IRejectWorkspaceInviteCommand extends IBaseRequestOfUnit {
+    invitationId?: string;
 }
 
 export interface FileResponse {

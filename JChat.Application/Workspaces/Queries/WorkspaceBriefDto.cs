@@ -7,4 +7,5 @@ public class WorkspaceBriefDto : IMapFrom<Workspace>
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public bool Joined { get; set; }
 }

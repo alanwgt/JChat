@@ -94,7 +94,7 @@
       "excludedParameterNames": [],
       "handleReferences": false,
       "generateConstructorInterface": true,
-      "convertConstructorInterfaceData": true,
+      "convertConstructorInterfaceData": false,
       "importRequiredTypes": true,
       "useGetBaseUrlMethod": false,
       "queryNullValue": "",

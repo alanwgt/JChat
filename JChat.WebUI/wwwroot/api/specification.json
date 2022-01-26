@@ -44,58 +44,13 @@
         "operationId": "Channels_List",
         "parameters": [
           {
-            "name": "User.Id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          },
-          {
-            "name": "User.Username",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "User.Firstname",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "User.Lastname",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          },
-          {
-            "name": "WorkspaceId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 5
-          },
-          {
             "name": "PageNumber",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 6
+            "x-position": 1
           },
           {
             "name": "PageSize",
@@ -104,7 +59,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 7
+            "x-position": 2
           }
         ],
         "responses": {
@@ -126,30 +81,37 @@
         "tags": [
           "Channels"
         ],
-        "operationId": "Channels_ListUsers",
+        "operationId": "Channels_Users",
         "parameters": [
           {
-            "name": "ChannelId",
+            "name": "channelId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             },
             "x-position": 2
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
           }
         ],
-        "requestBody": {
-          "x-name": "query",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetChannelUsersQuery"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
         "responses": {
           "200": {
             "description": "",
@@ -704,36 +666,7 @@
       },
       "WorkspaceScopedRequestOfChannelBriefDto": {
         "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/IUser"
-          },
-          "workspaceId": {
-            "type": "string",
-            "format": "guid"
-          }
-        }
-      },
-      "IUser": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "username": {
-            "type": "string"
-          },
-          "firstname": {
-            "type": "string"
-          },
-          "lastname": {
-            "type": "string"
-          }
-        }
+        "additionalProperties": false
       },
       "PaginatedListOfChannelBriefDto": {
         "type": "object",
@@ -810,57 +743,6 @@
           "channelId": {
             "type": "string",
             "format": "guid"
-          }
-        }
-      },
-      "GetChannelUsersQuery": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/WorkspaceScopedPaginatedRequestOfChannelUserBriefDto"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "channelId": {
-                "type": "string",
-                "format": "guid"
-              }
-            }
-          }
-        ]
-      },
-      "WorkspaceScopedPaginatedRequestOfChannelUserBriefDto": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PaginatedQueryOfChannelUserBriefDto"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "user": {
-                "$ref": "#/components/schemas/IUser"
-              },
-              "workspaceId": {
-                "type": "string",
-                "format": "guid"
-              }
-            }
-          }
-        ]
-      },
-      "PaginatedQueryOfChannelUserBriefDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },

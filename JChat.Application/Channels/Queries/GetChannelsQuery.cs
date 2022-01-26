@@ -27,6 +27,7 @@ public class GetChannelsQueryHandler : IRequestHandler<GetChannelsQuery, Paginat
 
     public Task<PaginatedList<ChannelBriefDto>> Handle(GetChannelsQuery request, CancellationToken cancellationToken)
     {
+        // TODO: list only authorized channels! (from keto)
         var query = _context.Channels
                 .Where(c => c.WorkspaceId == request.WorkspaceId)
                 .Where(c => !c.IsPrivate)

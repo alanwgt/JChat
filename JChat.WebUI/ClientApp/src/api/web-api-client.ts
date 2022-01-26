@@ -13,8 +13,8 @@ import * as moment from 'moment';
 
 export interface IChannelsClient {
     create(command: CreateChannelCommand): Promise<ChannelBriefDto>;
-    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
-    listUsers(channelId: string, query: GetChannelUsersQuery): Promise<PaginatedListOfChannelUserBriefDto>;
+    list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
+    users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelUserBriefDto>;
 }
 
 export class ChannelsClient implements IChannelsClient {
@@ -82,22 +82,8 @@ export class ChannelsClient implements IChannelsClient {
         return Promise.resolve<ChannelBriefDto>(<any>null);
     }
 
-    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelBriefDto> {
+    list(pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelBriefDto> {
         let url_ = this.baseUrl + "/channels?";
-        if (user_Id === null)
-            throw new Error("The parameter 'user_Id' cannot be null.");
-        else if (user_Id !== undefined)
-            url_ += "User.Id=" + encodeURIComponent("" + user_Id) + "&";
-        if (user_Username !== undefined && user_Username !== null)
-            url_ += "User.Username=" + encodeURIComponent("" + user_Username) + "&";
-        if (user_Firstname !== undefined && user_Firstname !== null)
-            url_ += "User.Firstname=" + encodeURIComponent("" + user_Firstname) + "&";
-        if (user_Lastname !== undefined && user_Lastname !== null)
-            url_ += "User.Lastname=" + encodeURIComponent("" + user_Lastname) + "&";
-        if (workspaceId === null)
-            throw new Error("The parameter 'workspaceId' cannot be null.");
-        else if (workspaceId !== undefined)
-            url_ += "WorkspaceId=" + encodeURIComponent("" + workspaceId) + "&";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
         else if (pageNumber !== undefined)
@@ -152,21 +138,25 @@ export class ChannelsClient implements IChannelsClient {
         return Promise.resolve<PaginatedListOfChannelBriefDto>(<any>null);
     }
 
-    listUsers(channelId: string, query: GetChannelUsersQuery , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelUserBriefDto> {
-        let url_ = this.baseUrl + "/channels/{ChannelId}/users";
+    users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelUserBriefDto> {
+        let url_ = this.baseUrl + "/channels/{ChannelId}/users?";
         if (channelId === undefined || channelId === null)
             throw new Error("The parameter 'channelId' must be defined.");
-        url_ = url_.replace("{ChannelId}", encodeURIComponent("" + channelId));
+        url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(query);
-
         let options_ = <AxiosRequestConfig>{
-            data: content_,
             method: "GET",
             url: url_,
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             cancelToken
@@ -179,11 +169,11 @@ export class ChannelsClient implements IChannelsClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processListUsers(_response);
+            return this.processUsers(_response);
         });
     }
 
-    protected processListUsers(response: AxiosResponse): Promise<PaginatedListOfChannelUserBriefDto> {
+    protected processUsers(response: AxiosResponse): Promise<PaginatedListOfChannelUserBriefDto> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -279,11 +269,11 @@ export class HookClient implements IHookClient {
 
 export interface ITestClient {
     testMe(): Promise<FileResponse>;
-    cmd(arg: string | null | undefined, user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined): Promise<FileResponse>;
-    write(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
-    read(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
-    expand(ns: string | null | undefined, oid: string | null | undefined, relation: string | null | undefined): Promise<FileResponse>;
-    list(ns: string | undefined, oid: string | null | undefined, relation: string | null | undefined, sid: string | null | undefined): Promise<FileResponse>;
+    cmd(arg?: string | null | undefined, user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined): Promise<FileResponse>;
+    write(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
+    read(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
+    expand(ns?: string | null | undefined, oid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
+    list(ns?: string | undefined, oid?: string | null | undefined, relation?: string | null | undefined, sid?: string | null | undefined): Promise<FileResponse>;
 }
 
 export class TestClient implements ITestClient {
@@ -346,7 +336,7 @@ export class TestClient implements ITestClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    cmd(arg: string | null | undefined, user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    cmd(arg?: string | null | undefined, user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/test/cmd?";
         if (arg !== undefined && arg !== null)
             url_ += "Arg=" + encodeURIComponent("" + arg) + "&";
@@ -405,7 +395,7 @@ export class TestClient implements ITestClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    write(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    write(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/test/write?";
         if (ns !== undefined && ns !== null)
             url_ += "ns=" + encodeURIComponent("" + ns) + "&";
@@ -460,7 +450,7 @@ export class TestClient implements ITestClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    read(ns: string | null | undefined, oid: string | null | undefined, sid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    read(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/test/read?";
         if (ns !== undefined && ns !== null)
             url_ += "ns=" + encodeURIComponent("" + ns) + "&";
@@ -515,7 +505,7 @@ export class TestClient implements ITestClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    expand(ns: string | null | undefined, oid: string | null | undefined, relation: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    expand(ns?: string | null | undefined, oid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/test/expand?";
         if (ns !== undefined && ns !== null)
             url_ += "ns=" + encodeURIComponent("" + ns) + "&";
@@ -568,7 +558,7 @@ export class TestClient implements ITestClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    list(ns: string | undefined, oid: string | null | undefined, relation: string | null | undefined, sid: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    list(ns?: string | undefined, oid?: string | null | undefined, relation?: string | null | undefined, sid?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/test/list?";
         if (ns === null)
             throw new Error("The parameter 'ns' cannot be null.");
@@ -627,7 +617,7 @@ export class TestClient implements ITestClient {
 }
 
 export interface IUsersClient {
-    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfUserBriefDto>;
+    list(user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined, workspaceId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfUserBriefDto>;
 }
 
 export class UsersClient implements IUsersClient {
@@ -643,7 +633,7 @@ export class UsersClient implements IUsersClient {
 
     }
 
-    list(user_Id: string | undefined, user_Username: string | null | undefined, user_Firstname: string | null | undefined, user_Lastname: string | null | undefined, workspaceId: string | undefined, pageNumber: number | undefined, pageSize: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfUserBriefDto> {
+    list(user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined, workspaceId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfUserBriefDto> {
         let url_ = this.baseUrl + "/users?";
         if (user_Id === null)
             throw new Error("The parameter 'user_Id' cannot be null.");
@@ -715,7 +705,7 @@ export class UsersClient implements IUsersClient {
 }
 
 export interface IWorkspacesClient {
-    list(pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfWorkspaceBriefDto>;
+    list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfWorkspaceBriefDto>;
     create(command: CreateWorkspaceCommand): Promise<WorkspaceBriefDto>;
 }
 
@@ -732,7 +722,7 @@ export class WorkspacesClient implements IWorkspacesClient {
 
     }
 
-    list(pageNumber: number | undefined, pageSize: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfWorkspaceBriefDto> {
+    list(pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfWorkspaceBriefDto> {
         let url_ = this.baseUrl + "/workspaces?";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
@@ -882,8 +872,6 @@ export interface IChannelBriefDto {
 }
 
 export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScopedRequestOfChannelBriefDto {
-    user?: IUser;
-    workspaceId?: string;
 
     constructor(data?: IWorkspaceScopedRequestOfChannelBriefDto) {
         if (data) {
@@ -895,10 +883,6 @@ export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScoped
     }
 
     init(_data?: any) {
-        if (_data) {
-            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
-            this.workspaceId = _data["workspaceId"];
-        }
     }
 
     static fromJS(data: any): WorkspaceScopedRequestOfChannelBriefDto {
@@ -910,15 +894,11 @@ export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScoped
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
-        data["workspaceId"] = this.workspaceId;
         return data;
     }
 }
 
 export interface IWorkspaceScopedRequestOfChannelBriefDto {
-    user?: IUser;
-    workspaceId?: string;
 }
 
 export class CreateChannelCommand extends WorkspaceScopedRequestOfChannelBriefDto implements ICreateChannelCommand {
@@ -958,52 +938,6 @@ export interface ICreateChannelCommand extends IWorkspaceScopedRequestOfChannelB
     isPrivate?: boolean;
 }
 
-export abstract class IUser implements IIUser {
-    id?: string;
-    username?: string;
-    firstname?: string;
-    lastname?: string;
-
-    constructor(data?: IIUser) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.username = _data["username"];
-            this.firstname = _data["firstname"];
-            this.lastname = _data["lastname"];
-        }
-    }
-
-    static fromJS(data: any): IUser {
-        data = typeof data === 'object' ? data : {};
-        throw new Error("The abstract class 'IUser' cannot be instantiated.");
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["username"] = this.username;
-        data["firstname"] = this.firstname;
-        data["lastname"] = this.lastname;
-        return data;
-    }
-}
-
-export interface IIUser {
-    id?: string;
-    username?: string;
-    firstname?: string;
-    lastname?: string;
-}
-
 export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBriefDto {
     items?: ChannelBriefDto[];
     pageNumber?: number;
@@ -1017,6 +951,13 @@ export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBr
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
+            }
+            if (data.items) {
+                this.items = [];
+                for (let i = 0; i < data.items.length; i++) {
+                    let item = data.items[i];
+                    this.items[i] = item && !(<any>item).toJSON ? new ChannelBriefDto(item) : <ChannelBriefDto>item;
+                }
             }
         }
     }
@@ -1060,7 +1001,7 @@ export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBr
 }
 
 export interface IPaginatedListOfChannelBriefDto {
-    items?: ChannelBriefDto[];
+    items?: IChannelBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1081,6 +1022,13 @@ export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChann
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
+            }
+            if (data.items) {
+                this.items = [];
+                for (let i = 0; i < data.items.length; i++) {
+                    let item = data.items[i];
+                    this.items[i] = item && !(<any>item).toJSON ? new ChannelUserBriefDto(item) : <ChannelUserBriefDto>item;
+                }
             }
         }
     }
@@ -1124,7 +1072,7 @@ export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChann
 }
 
 export interface IPaginatedListOfChannelUserBriefDto {
-    items?: ChannelUserBriefDto[];
+    items?: IChannelUserBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1173,116 +1121,6 @@ export class ChannelUserBriefDto implements IChannelUserBriefDto {
 export interface IChannelUserBriefDto {
     id?: string;
     userId?: string;
-    channelId?: string;
-}
-
-export class PaginatedQueryOfChannelUserBriefDto implements IPaginatedQueryOfChannelUserBriefDto {
-    pageNumber?: number;
-    pageSize?: number;
-
-    constructor(data?: IPaginatedQueryOfChannelUserBriefDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.pageNumber = _data["pageNumber"];
-            this.pageSize = _data["pageSize"];
-        }
-    }
-
-    static fromJS(data: any): PaginatedQueryOfChannelUserBriefDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new PaginatedQueryOfChannelUserBriefDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["pageNumber"] = this.pageNumber;
-        data["pageSize"] = this.pageSize;
-        return data;
-    }
-}
-
-export interface IPaginatedQueryOfChannelUserBriefDto {
-    pageNumber?: number;
-    pageSize?: number;
-}
-
-export class WorkspaceScopedPaginatedRequestOfChannelUserBriefDto extends PaginatedQueryOfChannelUserBriefDto implements IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
-    user?: IUser;
-    workspaceId?: string;
-
-    constructor(data?: IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto) {
-        super(data);
-    }
-
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
-            this.workspaceId = _data["workspaceId"];
-        }
-    }
-
-    static fromJS(data: any): WorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new WorkspaceScopedPaginatedRequestOfChannelUserBriefDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
-        data["workspaceId"] = this.workspaceId;
-        super.toJSON(data);
-        return data;
-    }
-}
-
-export interface IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto extends IPaginatedQueryOfChannelUserBriefDto {
-    user?: IUser;
-    workspaceId?: string;
-}
-
-export class GetChannelUsersQuery extends WorkspaceScopedPaginatedRequestOfChannelUserBriefDto implements IGetChannelUsersQuery {
-    channelId?: string;
-
-    constructor(data?: IGetChannelUsersQuery) {
-        super(data);
-    }
-
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.channelId = _data["channelId"];
-        }
-    }
-
-    static fromJS(data: any): GetChannelUsersQuery {
-        data = typeof data === 'object' ? data : {};
-        let result = new GetChannelUsersQuery();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["channelId"] = this.channelId;
-        super.toJSON(data);
-        return data;
-    }
-}
-
-export interface IGetChannelUsersQuery extends IWorkspaceScopedPaginatedRequestOfChannelUserBriefDto {
     channelId?: string;
 }
 
@@ -1348,6 +1186,13 @@ export class PaginatedListOfUserBriefDto implements IPaginatedListOfUserBriefDto
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+            if (data.items) {
+                this.items = [];
+                for (let i = 0; i < data.items.length; i++) {
+                    let item = data.items[i];
+                    this.items[i] = item && !(<any>item).toJSON ? new UserBriefDto(item) : <UserBriefDto>item;
+                }
+            }
         }
     }
 
@@ -1390,7 +1235,7 @@ export class PaginatedListOfUserBriefDto implements IPaginatedListOfUserBriefDto
 }
 
 export interface IPaginatedListOfUserBriefDto {
-    items?: UserBriefDto[];
+    items?: IUserBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;
@@ -1456,6 +1301,13 @@ export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspa
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+            if (data.items) {
+                this.items = [];
+                for (let i = 0; i < data.items.length; i++) {
+                    let item = data.items[i];
+                    this.items[i] = item && !(<any>item).toJSON ? new WorkspaceBriefDto(item) : <WorkspaceBriefDto>item;
+                }
+            }
         }
     }
 
@@ -1498,7 +1350,7 @@ export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspa
 }
 
 export interface IPaginatedListOfWorkspaceBriefDto {
-    items?: WorkspaceBriefDto[];
+    items?: IWorkspaceBriefDto[];
     pageNumber?: number;
     totalPages?: number;
     totalCount?: number;

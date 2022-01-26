@@ -1,5 +1,8 @@
 using JChat.Application.Channels.Commands;
 using JChat.Application.Channels.Queries;
+using JChat.Application.Extensions;
+using JChat.Application.Messages.Commands;
+using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Models;
 using JChat.WebUI.Controllers.SeedWork;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +16,16 @@ public class ChannelsController : ApiController
         => Ok(await Mediator.Send(command));
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<ChannelBriefDto>>> List([FromQuery] GetChannelsQuery query)
-        => Ok(await Mediator.Send(query));
+    public async Task<ActionResult<PaginatedList<ChannelBriefDto>>> List([FromQuery] PaginationData data)
+        => Ok(await Mediator.Send(new GetChannelsQuery().WithPaginationData(data)));
 
-    [HttpGet("{ChannelId}/users")]
-    public async Task<ActionResult<PaginatedList<ChannelUserBriefDto>>> ListUsers(GetChannelUsersQuery query)
-        => Ok(await Mediator.Send(query));
+    [HttpGet("{ChannelId:guid}/users")]
+    public async Task<ActionResult<PaginatedList<ChannelUserBriefDto>>> Users(Guid channelId,
+        [FromQuery] PaginationData paginationData)
+        => Ok(
+            await Mediator.Send(new GetChannelUsersQuery { ChannelId = channelId }.WithPaginationData(paginationData)));
+
+    [HttpPost("{ChannelId:guid}/messages")]
+    public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command)
+        => Ok(await Mediator.Send(command));
 }

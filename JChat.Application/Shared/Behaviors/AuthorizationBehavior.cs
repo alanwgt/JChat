@@ -86,7 +86,7 @@ public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 
             if (!await authzRequest)
             {
-                throw new ForbiddenAccessException($"unauthorized access in command {request.GetType().Name}");
+                throw new ForbiddenAccessException($"forbidden access in {request.GetType().Name} by {user.Username} - {user.Id}");
             }
         }
 

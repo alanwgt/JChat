@@ -4,7 +4,7 @@ namespace JChat.Domain.SeedWork;
 
 public abstract class Entity : IEntity<Guid>, IEquatable<Entity>
 {
-    public Guid Id { get; protected set; }
+    public Guid Id { get; protected set; } = Guid.NewGuid();
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

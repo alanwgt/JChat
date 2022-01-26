@@ -6,6 +6,26 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/boot": {
+      "get": {
+        "tags": [
+          "Boot"
+        ],
+        "operationId": "Boot_Init",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BootDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channels": {
       "post": {
         "tags": [
@@ -76,7 +96,7 @@
         }
       }
     },
-    "/channels/{ChannelId}/users": {
+    "/channels/{channelId}/users": {
       "get": {
         "tags": [
           "Channels"
@@ -124,6 +144,92 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "operationId": "Channels_AddMember",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUserToChannelCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelUserBriefDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channels/{channelId}/messages": {
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "operationId": "Channels_SendMessage",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageBriefDto"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/hook/kratos/registration": {
@@ -144,321 +250,6 @@
           "required": true,
           "x-position": 1
         },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/evt": {
-      "get": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_TestMe",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/cmd": {
-      "get": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_Cmd",
-        "parameters": [
-          {
-            "name": "Arg",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          },
-          {
-            "name": "User.Id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 2
-          },
-          {
-            "name": "User.Username",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "User.Firstname",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          },
-          {
-            "name": "User.Lastname",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 5
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/write": {
-      "post": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_Write",
-        "parameters": [
-          {
-            "name": "ns",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          },
-          {
-            "name": "oid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "sid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "relation",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/read": {
-      "get": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_Read",
-        "parameters": [
-          {
-            "name": "ns",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          },
-          {
-            "name": "oid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "sid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "relation",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/expand": {
-      "get": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_Expand",
-        "parameters": [
-          {
-            "name": "ns",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          },
-          {
-            "name": "oid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "relation",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/test/list": {
-      "get": {
-        "tags": [
-          "Test"
-        ],
-        "operationId": "Test_List",
-        "parameters": [
-          {
-            "name": "ns",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          },
-          {
-            "name": "oid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "relation",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 3
-          },
-          {
-            "name": "sid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 4
-          }
-        ],
         "responses": {
           "200": {
             "description": "",
@@ -632,6 +423,43 @@
   },
   "components": {
     "schemas": {
+      "BootDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "messagePriorities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdNameDto"
+            }
+          },
+          "messageReactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdNameDto"
+            }
+          },
+          "messageTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdNameDto"
+            }
+          }
+        }
+      },
+      "IdNameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "ChannelBriefDto": {
         "type": "object",
         "additionalProperties": false,
@@ -665,8 +493,50 @@
         ]
       },
       "WorkspaceScopedRequestOfChannelBriefDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfChannelBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "workspaceId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "BaseRequestOfChannelBriefDto": {
         "type": "object",
-        "additionalProperties": false
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/IUser"
+          }
+        }
+      },
+      "IUser": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          }
+        }
       },
       "PaginatedListOfChannelBriefDto": {
         "type": "object",
@@ -743,6 +613,129 @@
           "channelId": {
             "type": "string",
             "format": "guid"
+          }
+        }
+      },
+      "AddUserToChannelCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfChannelUserBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "channelId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "WorkspaceScopedRequestOfChannelUserBriefDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfChannelUserBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "workspaceId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "BaseRequestOfChannelUserBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/IUser"
+          }
+        }
+      },
+      "MessageBriefDto": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateMessageCommand": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChannelScopedRequestOfMessageBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "body": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "format": "guid"
+              },
+              "priority": {
+                "type": "string",
+                "format": "guid"
+              },
+              "expirationDate": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "ChannelScopedRequestOfMessageBriefDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfMessageBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "channelId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "WorkspaceScopedRequestOfMessageBriefDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRequestOfMessageBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "workspaceId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "BaseRequestOfMessageBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/IUser"
           }
         }
       },

@@ -25,6 +25,13 @@ public class ChannelsController : ApiController
         => Ok(
             await Mediator.Send(new GetChannelUsersQuery { ChannelId = channelId }.WithPaginationData(paginationData)));
 
+    [HttpPost("{channelId:guid}/users")]
+    public async Task<ActionResult<ChannelUserBriefDto>> AddMember(AddUserToChannelCommand command, Guid channelId)
+    {
+        command.ChannelId = channelId;
+        return Ok(await Mediator.Send(command));
+    }
+
     [HttpPost("{channelId:guid}/messages")]
     public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command, Guid channelId)
     {

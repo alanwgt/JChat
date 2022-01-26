@@ -11,10 +11,78 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, Ca
 
 import * as moment from 'moment';
 
+export interface IBootClient {
+    init(): Promise<BootDto>;
+}
+
+export class BootClient implements IBootClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+
+    }
+
+    init(  cancelToken?: CancelToken | undefined): Promise<BootDto> {
+        let url_ = this.baseUrl + "/boot";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processInit(_response);
+        });
+    }
+
+    protected processInit(response: AxiosResponse): Promise<BootDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = BootDto.fromJS(resultData200);
+            return Promise.resolve<BootDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<BootDto>(<any>null);
+    }
+}
+
 export interface IChannelsClient {
     create(command: CreateChannelCommand): Promise<ChannelBriefDto>;
     list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
     users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelUserBriefDto>;
+    addMember(command: AddUserToChannelCommand, channelId: string): Promise<ChannelUserBriefDto>;
+    sendMessage(command: CreateMessageCommand, channelId: string): Promise<MessageBriefDto>;
 }
 
 export class ChannelsClient implements IChannelsClient {
@@ -139,7 +207,7 @@ export class ChannelsClient implements IChannelsClient {
     }
 
     users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelUserBriefDto> {
-        let url_ = this.baseUrl + "/channels/{ChannelId}/users?";
+        let url_ = this.baseUrl + "/channels/{channelId}/users?";
         if (channelId === undefined || channelId === null)
             throw new Error("The parameter 'channelId' must be defined.");
         url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
@@ -196,6 +264,116 @@ export class ChannelsClient implements IChannelsClient {
         }
         return Promise.resolve<PaginatedListOfChannelUserBriefDto>(<any>null);
     }
+
+    addMember(command: AddUserToChannelCommand, channelId: string , cancelToken?: CancelToken | undefined): Promise<ChannelUserBriefDto> {
+        let url_ = this.baseUrl + "/channels/{channelId}/users";
+        if (channelId === undefined || channelId === null)
+            throw new Error("The parameter 'channelId' must be defined.");
+        url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddMember(_response);
+        });
+    }
+
+    protected processAddMember(response: AxiosResponse): Promise<ChannelUserBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = ChannelUserBriefDto.fromJS(resultData200);
+            return Promise.resolve<ChannelUserBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ChannelUserBriefDto>(<any>null);
+    }
+
+    sendMessage(command: CreateMessageCommand, channelId: string , cancelToken?: CancelToken | undefined): Promise<MessageBriefDto> {
+        let url_ = this.baseUrl + "/channels/{channelId}/messages";
+        if (channelId === undefined || channelId === null)
+            throw new Error("The parameter 'channelId' must be defined.");
+        url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ = <AxiosRequestConfig>{
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSendMessage(_response);
+        });
+    }
+
+    protected processSendMessage(response: AxiosResponse): Promise<MessageBriefDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = MessageBriefDto.fromJS(resultData200);
+            return Promise.resolve<MessageBriefDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<MessageBriefDto>(<any>null);
+    }
 }
 
 export interface IHookClient {
@@ -245,355 +423,6 @@ export class HookClient implements IHookClient {
     }
 
     protected processKratosRegistrationHook(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-}
-
-export interface ITestClient {
-    testMe(): Promise<FileResponse>;
-    cmd(arg?: string | null | undefined, user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined): Promise<FileResponse>;
-    write(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
-    read(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
-    expand(ns?: string | null | undefined, oid?: string | null | undefined, relation?: string | null | undefined): Promise<FileResponse>;
-    list(ns?: string | undefined, oid?: string | null | undefined, relation?: string | null | undefined, sid?: string | null | undefined): Promise<FileResponse>;
-}
-
-export class TestClient implements ITestClient {
-    private instance: AxiosInstance;
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(baseUrl?: string, instance?: AxiosInstance) {
-
-        this.instance = instance ? instance : axios.create();
-
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
-
-    }
-
-    testMe(  cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/evt";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processTestMe(_response);
-        });
-    }
-
-    protected processTestMe(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-
-    cmd(arg?: string | null | undefined, user_Id?: string | undefined, user_Username?: string | null | undefined, user_Firstname?: string | null | undefined, user_Lastname?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/cmd?";
-        if (arg !== undefined && arg !== null)
-            url_ += "Arg=" + encodeURIComponent("" + arg) + "&";
-        if (user_Id === null)
-            throw new Error("The parameter 'user_Id' cannot be null.");
-        else if (user_Id !== undefined)
-            url_ += "User.Id=" + encodeURIComponent("" + user_Id) + "&";
-        if (user_Username !== undefined && user_Username !== null)
-            url_ += "User.Username=" + encodeURIComponent("" + user_Username) + "&";
-        if (user_Firstname !== undefined && user_Firstname !== null)
-            url_ += "User.Firstname=" + encodeURIComponent("" + user_Firstname) + "&";
-        if (user_Lastname !== undefined && user_Lastname !== null)
-            url_ += "User.Lastname=" + encodeURIComponent("" + user_Lastname) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processCmd(_response);
-        });
-    }
-
-    protected processCmd(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-
-    write(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/write?";
-        if (ns !== undefined && ns !== null)
-            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
-        if (oid !== undefined && oid !== null)
-            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
-        if (sid !== undefined && sid !== null)
-            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
-        if (relation !== undefined && relation !== null)
-            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "POST",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processWrite(_response);
-        });
-    }
-
-    protected processWrite(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-
-    read(ns?: string | null | undefined, oid?: string | null | undefined, sid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/read?";
-        if (ns !== undefined && ns !== null)
-            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
-        if (oid !== undefined && oid !== null)
-            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
-        if (sid !== undefined && sid !== null)
-            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
-        if (relation !== undefined && relation !== null)
-            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processRead(_response);
-        });
-    }
-
-    protected processRead(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-
-    expand(ns?: string | null | undefined, oid?: string | null | undefined, relation?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/expand?";
-        if (ns !== undefined && ns !== null)
-            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
-        if (oid !== undefined && oid !== null)
-            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
-        if (relation !== undefined && relation !== null)
-            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processExpand(_response);
-        });
-    }
-
-    protected processExpand(response: AxiosResponse): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data]), headers: _headers });
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<FileResponse>(<any>null);
-    }
-
-    list(ns?: string | undefined, oid?: string | null | undefined, relation?: string | null | undefined, sid?: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/test/list?";
-        if (ns === null)
-            throw new Error("The parameter 'ns' cannot be null.");
-        else if (ns !== undefined)
-            url_ += "ns=" + encodeURIComponent("" + ns) + "&";
-        if (oid !== undefined && oid !== null)
-            url_ += "oid=" + encodeURIComponent("" + oid) + "&";
-        if (relation !== undefined && relation !== null)
-            url_ += "relation=" + encodeURIComponent("" + relation) + "&";
-        if (sid !== undefined && sid !== null)
-            url_ += "sid=" + encodeURIComponent("" + sid) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/octet-stream"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processList(_response);
-        });
-    }
-
-    protected processList(response: AxiosResponse): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -831,6 +660,135 @@ export class WorkspacesClient implements IWorkspacesClient {
     }
 }
 
+export class BootDto implements IBootDto {
+    messagePriorities?: IdNameDto[];
+    messageReactions?: IdNameDto[];
+    messageTypes?: IdNameDto[];
+
+    constructor(data?: IBootDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            if (data.messagePriorities) {
+                this.messagePriorities = [];
+                for (let i = 0; i < data.messagePriorities.length; i++) {
+                    let item = data.messagePriorities[i];
+                    this.messagePriorities[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
+                }
+            }
+            if (data.messageReactions) {
+                this.messageReactions = [];
+                for (let i = 0; i < data.messageReactions.length; i++) {
+                    let item = data.messageReactions[i];
+                    this.messageReactions[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
+                }
+            }
+            if (data.messageTypes) {
+                this.messageTypes = [];
+                for (let i = 0; i < data.messageTypes.length; i++) {
+                    let item = data.messageTypes[i];
+                    this.messageTypes[i] = item && !(<any>item).toJSON ? new IdNameDto(item) : <IdNameDto>item;
+                }
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["messagePriorities"])) {
+                this.messagePriorities = [] as any;
+                for (let item of _data["messagePriorities"])
+                    this.messagePriorities!.push(IdNameDto.fromJS(item));
+            }
+            if (Array.isArray(_data["messageReactions"])) {
+                this.messageReactions = [] as any;
+                for (let item of _data["messageReactions"])
+                    this.messageReactions!.push(IdNameDto.fromJS(item));
+            }
+            if (Array.isArray(_data["messageTypes"])) {
+                this.messageTypes = [] as any;
+                for (let item of _data["messageTypes"])
+                    this.messageTypes!.push(IdNameDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BootDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BootDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.messagePriorities)) {
+            data["messagePriorities"] = [];
+            for (let item of this.messagePriorities)
+                data["messagePriorities"].push(item.toJSON());
+        }
+        if (Array.isArray(this.messageReactions)) {
+            data["messageReactions"] = [];
+            for (let item of this.messageReactions)
+                data["messageReactions"].push(item.toJSON());
+        }
+        if (Array.isArray(this.messageTypes)) {
+            data["messageTypes"] = [];
+            for (let item of this.messageTypes)
+                data["messageTypes"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IBootDto {
+    messagePriorities?: IIdNameDto[];
+    messageReactions?: IIdNameDto[];
+    messageTypes?: IIdNameDto[];
+}
+
+export class IdNameDto implements IIdNameDto {
+    id?: string;
+    name?: string;
+
+    constructor(data?: IIdNameDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): IdNameDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new IdNameDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IIdNameDto {
+    id?: string;
+    name?: string;
+}
+
 export class ChannelBriefDto implements IChannelBriefDto {
     id?: string;
     name?: string;
@@ -871,18 +829,55 @@ export interface IChannelBriefDto {
     name?: string;
 }
 
-export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScopedRequestOfChannelBriefDto {
+export class BaseRequestOfChannelBriefDto implements IBaseRequestOfChannelBriefDto {
+    user?: IUser;
 
-    constructor(data?: IWorkspaceScopedRequestOfChannelBriefDto) {
+    constructor(data?: IBaseRequestOfChannelBriefDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
         }
     }
 
     init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseRequestOfChannelBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseRequestOfChannelBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseRequestOfChannelBriefDto {
+    user?: IIUser;
+}
+
+export class WorkspaceScopedRequestOfChannelBriefDto extends BaseRequestOfChannelBriefDto implements IWorkspaceScopedRequestOfChannelBriefDto {
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedRequestOfChannelBriefDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+        }
     }
 
     static fromJS(data: any): WorkspaceScopedRequestOfChannelBriefDto {
@@ -894,11 +889,14 @@ export class WorkspaceScopedRequestOfChannelBriefDto implements IWorkspaceScoped
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        super.toJSON(data);
         return data;
     }
 }
 
-export interface IWorkspaceScopedRequestOfChannelBriefDto {
+export interface IWorkspaceScopedRequestOfChannelBriefDto extends IBaseRequestOfChannelBriefDto {
+    workspaceId?: string;
 }
 
 export class CreateChannelCommand extends WorkspaceScopedRequestOfChannelBriefDto implements ICreateChannelCommand {
@@ -936,6 +934,52 @@ export class CreateChannelCommand extends WorkspaceScopedRequestOfChannelBriefDt
 export interface ICreateChannelCommand extends IWorkspaceScopedRequestOfChannelBriefDto {
     name?: string;
     isPrivate?: boolean;
+}
+
+export abstract class IUser implements IIUser {
+    id?: string;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+
+    constructor(data?: IIUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.username = _data["username"];
+            this.firstname = _data["firstname"];
+            this.lastname = _data["lastname"];
+        }
+    }
+
+    static fromJS(data: any): IUser {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'IUser' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["username"] = this.username;
+        data["firstname"] = this.firstname;
+        data["lastname"] = this.lastname;
+        return data;
+    }
+}
+
+export interface IIUser {
+    id?: string;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
 }
 
 export class PaginatedListOfChannelBriefDto implements IPaginatedListOfChannelBriefDto {
@@ -1122,6 +1166,291 @@ export interface IChannelUserBriefDto {
     id?: string;
     userId?: string;
     channelId?: string;
+}
+
+export class BaseRequestOfChannelUserBriefDto implements IBaseRequestOfChannelUserBriefDto {
+    user?: IUser;
+
+    constructor(data?: IBaseRequestOfChannelUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseRequestOfChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseRequestOfChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseRequestOfChannelUserBriefDto {
+    user?: IIUser;
+}
+
+export class WorkspaceScopedRequestOfChannelUserBriefDto extends BaseRequestOfChannelUserBriefDto implements IWorkspaceScopedRequestOfChannelUserBriefDto {
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedRequestOfChannelUserBriefDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+        }
+    }
+
+    static fromJS(data: any): WorkspaceScopedRequestOfChannelUserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new WorkspaceScopedRequestOfChannelUserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWorkspaceScopedRequestOfChannelUserBriefDto extends IBaseRequestOfChannelUserBriefDto {
+    workspaceId?: string;
+}
+
+export class AddUserToChannelCommand extends WorkspaceScopedRequestOfChannelUserBriefDto implements IAddUserToChannelCommand {
+    channelId?: string;
+    userId?: string;
+
+    constructor(data?: IAddUserToChannelCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.channelId = _data["channelId"];
+            this.userId = _data["userId"];
+        }
+    }
+
+    static fromJS(data: any): AddUserToChannelCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddUserToChannelCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channelId"] = this.channelId;
+        data["userId"] = this.userId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IAddUserToChannelCommand extends IWorkspaceScopedRequestOfChannelUserBriefDto {
+    channelId?: string;
+    userId?: string;
+}
+
+export class MessageBriefDto implements IMessageBriefDto {
+
+    constructor(data?: IMessageBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): MessageBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessageBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IMessageBriefDto {
+}
+
+export class BaseRequestOfMessageBriefDto implements IBaseRequestOfMessageBriefDto {
+    user?: IUser;
+
+    constructor(data?: IBaseRequestOfMessageBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+            this.user = data.user && !(<any>data.user).toJSON ? new IUser(data.user) : <IUser>this.user;
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.user = _data["user"] ? IUser.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseRequestOfMessageBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseRequestOfMessageBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseRequestOfMessageBriefDto {
+    user?: IIUser;
+}
+
+export class WorkspaceScopedRequestOfMessageBriefDto extends BaseRequestOfMessageBriefDto implements IWorkspaceScopedRequestOfMessageBriefDto {
+    workspaceId?: string;
+
+    constructor(data?: IWorkspaceScopedRequestOfMessageBriefDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+        }
+    }
+
+    static fromJS(data: any): WorkspaceScopedRequestOfMessageBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new WorkspaceScopedRequestOfMessageBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWorkspaceScopedRequestOfMessageBriefDto extends IBaseRequestOfMessageBriefDto {
+    workspaceId?: string;
+}
+
+export class ChannelScopedRequestOfMessageBriefDto extends WorkspaceScopedRequestOfMessageBriefDto implements IChannelScopedRequestOfMessageBriefDto {
+    channelId?: string;
+
+    constructor(data?: IChannelScopedRequestOfMessageBriefDto) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.channelId = _data["channelId"];
+        }
+    }
+
+    static fromJS(data: any): ChannelScopedRequestOfMessageBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelScopedRequestOfMessageBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channelId"] = this.channelId;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IChannelScopedRequestOfMessageBriefDto extends IWorkspaceScopedRequestOfMessageBriefDto {
+    channelId?: string;
+}
+
+export class CreateMessageCommand extends ChannelScopedRequestOfMessageBriefDto implements ICreateMessageCommand {
+    body?: string;
+    type?: string;
+    priority?: string;
+    expirationDate?: moment.Moment | undefined;
+
+    constructor(data?: ICreateMessageCommand) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.body = _data["body"];
+            this.type = _data["type"];
+            this.priority = _data["priority"];
+            this.expirationDate = _data["expirationDate"] ? moment(_data["expirationDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): CreateMessageCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateMessageCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["body"] = this.body;
+        data["type"] = this.type;
+        data["priority"] = this.priority;
+        data["expirationDate"] = this.expirationDate ? this.expirationDate.toISOString() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface ICreateMessageCommand extends IChannelScopedRequestOfMessageBriefDto {
+    body?: string;
+    type?: string;
+    priority?: string;
+    expirationDate?: moment.Moment | undefined;
 }
 
 export class User implements IUser {

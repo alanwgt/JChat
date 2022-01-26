@@ -31,6 +31,7 @@ public class GetChannelsQueryHandler : IRequestHandler<GetChannelsQuery, Paginat
         var query = _context.Channels
                 .Where(c => c.WorkspaceId == request.WorkspaceId)
                 .Where(c => !c.IsPrivate)
+                .OrderBy(c => c.Name)
                 .AsNoTracking();
 
         return query.PaginatedListAsync(request, _mapper.ConfigurationProvider);

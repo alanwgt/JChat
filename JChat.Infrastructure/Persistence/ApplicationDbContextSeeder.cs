@@ -1,22 +1,55 @@
 using JChat.Domain.Entities.Message;
+using JChat.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace JChat.Infrastructure.Persistence;
 
 public class ApplicationDbContextSeeder
 {
-    public async Task SeedReactions(ApplicationDbContext context, Guid userId)
+    private readonly ModelBuilder _modelBuilder;
+    public ApplicationDbContextSeeder(ModelBuilder modelBuilder)
     {
-        if (context.Reactions.Any())
-            return;
+        _modelBuilder = modelBuilder;
+    }
 
-        context.Reactions.Add(new Reaction("reaction.like", "thumbs-up", "1A85BA"));
-        context.Reactions.Add(new Reaction("reaction.celebrate", "celebrate", "6EAD51"));
-        context.Reactions.Add(new Reaction("reaction.love", "love", "DA7150"));
-        context.Reactions.Add(new Reaction("reaction.insightful", "insightful", "F0B85F"));
-        context.Reactions.Add(new Reaction("reaction.curious", "curious", "DCB9DA"));
-        context.Reactions.Add(new Reaction("reaction.rocket", "rocket", "CE5044"));
-        context.Reactions.Add(new Reaction("reaction.eyes", "eyes", "FFFFFF"));
+    public void Seed()
+    {
+        SeedReactions();
+        SeedMessagePriorities();
+        SeedMessageTypes();
+    }
 
-        await context.SaveChangesAsync();
+    private void SeedReactions()
+    {
+        var entity = _modelBuilder.Entity<Reaction>();
+
+        entity.HasData(new Reaction("reaction.like", "thumbs-up", "1A85BA"));
+        entity.HasData(new Reaction("reaction.celebrate", "celebrate", "6EAD51"));
+        entity.HasData(new Reaction("reaction.love", "love", "DA7150"));
+        entity.HasData(new Reaction("reaction.insightful", "insightful", "F0B85F"));
+        entity.HasData(new Reaction("reaction.curious", "curious", "DCB9DA"));
+        entity.HasData(new Reaction("reaction.rocket", "rocket", "CE5044"));
+        entity.HasData(new Reaction("reaction.eyes", "eyes", "FFFFFF"));
+    }
+
+    private void SeedMessageTypes()
+    {
+        var entity = _modelBuilder.Entity<MessageType>();
+
+        entity.HasData(new MessageType("message.type.audio"));
+        entity.HasData(new MessageType("message.type.gif"));
+        entity.HasData(new MessageType("message.type.image"));
+        entity.HasData(new MessageType("message.type.text"));
+        entity.HasData(new MessageType("message.type.video"));
+    }
+
+    private void SeedMessagePriorities()
+    {
+        var entity = _modelBuilder.Entity<MessagePriority>();
+
+        entity.HasData(new MessagePriority("message.priority.normal", MessagePriorityType.Normal));
+        entity.HasData(new MessagePriority("message.priority.snooze", MessagePriorityType.Snooze));
+        entity.HasData(new MessagePriority("message.priority.requires_confirmation", MessagePriorityType.RequiresConfirmation));
+        entity.HasData(new MessagePriority("message.priority.requires_confirmation_snooze", MessagePriorityType.RequiresConfirmationAndSnooze));
     }
 }

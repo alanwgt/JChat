@@ -118,6 +118,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
         builder.ApplyAuditableEntityConfiguration();
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        var seeder = new ApplicationDbContextSeeder(builder);
+        seeder.Seed();
 
         base.OnModelCreating(builder);
     }

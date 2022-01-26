@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JChat.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220125090115_InitialMigration")]
+    [Migration("20220126142856_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -151,13 +151,25 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by_id");
+
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expiration_date");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_id");
 
                     b.Property<Guid>("MessagePriorityId")
                         .HasColumnType("uuid")
@@ -180,15 +192,17 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_messages");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_messages_user_id");
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_messages_created_by_id");
+
+                    b.HasIndex("DeletedById")
+                        .HasDatabaseName("ix_messages_deleted_by_id");
+
+                    b.HasIndex("LastModifiedById")
+                        .HasDatabaseName("ix_messages_last_modified_by_id");
 
                     b.ToTable("messages", (string)null);
                 });
@@ -204,9 +218,21 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by_id");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_id");
 
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uuid")
@@ -216,15 +242,17 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_message_highlights");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_message_highlights_user_id");
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_message_highlights_created_by_id");
+
+                    b.HasIndex("DeletedById")
+                        .HasDatabaseName("ix_message_highlights_deleted_by_id");
+
+                    b.HasIndex("LastModifiedById")
+                        .HasDatabaseName("ix_message_highlights_last_modified_by_id");
 
                     b.ToTable("message_highlights", (string)null);
                 });
@@ -249,8 +277,8 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<int>("Priority")
-                        .HasColumnType("char")
+                    b.Property<short>("Priority")
+                        .HasColumnType("smallint")
                         .HasColumnName("priority");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -261,6 +289,36 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasName("pk_message_priorities");
 
                     b.ToTable("message_priorities", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("633f5c7a-d1b6-4b9f-8bf7-2dbe53ce9922"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.priority.normal",
+                            Priority = (short)0
+                        },
+                        new
+                        {
+                            Id = new Guid("b01b3ea0-e48f-4a3e-aad9-d3b26cfdedad"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.priority.snooze",
+                            Priority = (short)50
+                        },
+                        new
+                        {
+                            Id = new Guid("2f0d6895-2f60-43d2-82a6-3e5d361ab1de"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.priority.requires_confirmation",
+                            Priority = (short)100
+                        },
+                        new
+                        {
+                            Id = new Guid("17b04c0f-58f3-48ba-901f-0c8266469d3f"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.priority.requires_confirmation_snooze",
+                            Priority = (short)128
+                        });
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageReaction", b =>
@@ -274,9 +332,21 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by_id");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_id");
 
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uuid")
@@ -290,18 +360,20 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_message_reactions");
 
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_message_reactions_created_by_id");
+
+                    b.HasIndex("DeletedById")
+                        .HasDatabaseName("ix_message_reactions_deleted_by_id");
+
+                    b.HasIndex("LastModifiedById")
+                        .HasDatabaseName("ix_message_reactions_last_modified_by_id");
+
                     b.HasIndex("MessageId")
                         .HasDatabaseName("ix_message_reactions_message_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_message_reactions_user_id");
 
                     b.ToTable("message_reactions", (string)null);
                 });
@@ -325,13 +397,25 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by_id");
+
                     b.Property<Guid?>("ForwardedById")
                         .HasColumnType("uuid")
                         .HasColumnName("forwarded_by_id");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_id");
 
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uuid")
@@ -345,22 +429,28 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("received_at");
 
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipient_id");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_message_recipients");
+
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_message_recipients_created_by_id");
+
+                    b.HasIndex("DeletedById")
+                        .HasDatabaseName("ix_message_recipients_deleted_by_id");
 
                     b.HasIndex("ForwardedById")
                         .HasDatabaseName("ix_message_recipients_forwarded_by_id");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_message_recipients_user_id");
+                    b.HasIndex("LastModifiedById")
+                        .HasDatabaseName("ix_message_recipients_last_modified_by_id");
 
                     b.ToTable("message_recipients", (string)null);
                 });
@@ -393,6 +483,38 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasName("pk_message_types");
 
                     b.ToTable("message_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0ef0564b-7b4a-49fb-92c7-7ab14067716b"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.audio"
+                        },
+                        new
+                        {
+                            Id = new Guid("5ddb5056-ddf4-4b1b-9cc0-3a7f232b8148"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.gif"
+                        },
+                        new
+                        {
+                            Id = new Guid("90f23ea7-ddcc-423e-ad40-a37bc9c8bc80"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.image"
+                        },
+                        new
+                        {
+                            Id = new Guid("65cab42b-3ff7-4f13-b90f-91abaa8228f1"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.text"
+                        },
+                        new
+                        {
+                            Id = new Guid("001dbae7-c0d5-43bc-8ce8-2d0e0ec2c54d"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.video"
+                        });
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.Reaction", b =>
@@ -433,6 +555,64 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasName("pk_reactions");
 
                     b.ToTable("reactions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ec025488-93e2-42a8-927c-7cb586bb3301"),
+                            Color = "1A85BA",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "thumbs-up",
+                            Name = "reaction.like"
+                        },
+                        new
+                        {
+                            Id = new Guid("5cc8585c-c6de-49fc-b15b-614d2b3988c1"),
+                            Color = "6EAD51",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "celebrate",
+                            Name = "reaction.celebrate"
+                        },
+                        new
+                        {
+                            Id = new Guid("c05b0de3-541e-4cdb-bcbb-b9f3aaef0187"),
+                            Color = "DA7150",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "love",
+                            Name = "reaction.love"
+                        },
+                        new
+                        {
+                            Id = new Guid("9514777c-4d6a-4c93-8a85-489405a7828a"),
+                            Color = "F0B85F",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "insightful",
+                            Name = "reaction.insightful"
+                        },
+                        new
+                        {
+                            Id = new Guid("4abe01ae-55ce-4976-be42-29069dc74b68"),
+                            Color = "DCB9DA",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "curious",
+                            Name = "reaction.curious"
+                        },
+                        new
+                        {
+                            Id = new Guid("843c64cb-c38a-431f-93a5-096655efca0a"),
+                            Color = "CE5044",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "rocket",
+                            Name = "reaction.rocket"
+                        },
+                        new
+                        {
+                            Id = new Guid("cca15e67-9ee5-47ea-bcfa-15061d97f70f"),
+                            Color = "FFFFFF",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Icon = "eyes",
+                            Name = "reaction.eyes"
+                        });
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.User.User", b =>
@@ -482,9 +662,21 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("accepted_at");
+
                     b.Property<bool>("Admin")
                         .HasColumnType("boolean")
                         .HasColumnName("admin");
+
+                    b.Property<Guid?>("BanishedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("banished_by_id");
+
+                    b.Property<string>("BanishmentReason")
+                        .HasColumnType("text")
+                        .HasColumnName("banishment_reason");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -505,6 +697,10 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("LastModifiedById")
                         .HasColumnType("uuid")
                         .HasColumnName("last_modified_by_id");
+
+                    b.Property<DateTime?>("RejectedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("rejected_at");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -648,30 +844,69 @@ namespace JChat.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.Message", b =>
                 {
-                    b.HasOne("JChat.Domain.Entities.User.User", "User")
+                    b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_messages_users_user_id");
+                        .HasForeignKey("CreatedById")
+                        .HasConstraintName("fk_messages_users_created_by_id");
 
-                    b.Navigation("User");
+                    b.HasOne("JChat.Domain.Entities.User.User", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .HasConstraintName("fk_messages_users_deleted_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasConstraintName("fk_messages_users_last_modified_by_id");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
+                    b.Navigation("LastModifiedBy");
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageHighlight", b =>
                 {
-                    b.HasOne("JChat.Domain.Entities.User.User", "User")
+                    b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_message_highlights_users_user_id");
+                        .HasForeignKey("CreatedById")
+                        .HasConstraintName("fk_message_highlights_users_created_by_id");
 
-                    b.Navigation("User");
+                    b.HasOne("JChat.Domain.Entities.User.User", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .HasConstraintName("fk_message_highlights_users_deleted_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasConstraintName("fk_message_highlights_users_last_modified_by_id");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
+                    b.Navigation("LastModifiedBy");
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageReaction", b =>
                 {
+                    b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasConstraintName("fk_message_reactions_users_created_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .HasConstraintName("fk_message_reactions_users_deleted_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasConstraintName("fk_message_reactions_users_last_modified_by_id");
+
                     b.HasOne("JChat.Domain.Entities.Message.Message", null)
                         .WithMany("Reactions")
                         .HasForeignKey("MessageId")
@@ -679,33 +914,42 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_message_reactions_messages_message_id");
 
-                    b.HasOne("JChat.Domain.Entities.User.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_message_reactions_users_user_id");
+                    b.Navigation("CreatedBy");
 
-                    b.Navigation("User");
+                    b.Navigation("DeletedBy");
+
+                    b.Navigation("LastModifiedBy");
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageRecipient", b =>
                 {
+                    b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasConstraintName("fk_message_recipients_users_created_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .HasConstraintName("fk_message_recipients_users_deleted_by_id");
+
                     b.HasOne("JChat.Domain.Entities.Message.MessageRecipient", "ForwardedBy")
                         .WithMany()
                         .HasForeignKey("ForwardedById")
                         .HasConstraintName("fk_message_recipients_message_recipients_forwarded_by_id");
 
-                    b.HasOne("JChat.Domain.Entities.User.User", "User")
+                    b.HasOne("JChat.Domain.Entities.User.User", "LastModifiedBy")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_message_recipients_users_user_id");
+                        .HasForeignKey("LastModifiedById")
+                        .HasConstraintName("fk_message_recipients_users_last_modified_by_id");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
 
                     b.Navigation("ForwardedBy");
 
-                    b.Navigation("User");
+                    b.Navigation("LastModifiedBy");
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.User.UserWorkspace", b =>

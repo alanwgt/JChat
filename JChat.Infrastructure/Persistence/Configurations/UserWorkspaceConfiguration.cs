@@ -21,5 +21,7 @@ public class UserWorkspaceConfiguration : IEntityTypeConfiguration<UserWorkspace
         builder
             .HasIndex(uw => new { uw.UserId, uw.WorkspaceId })
             .IsUnique();
+
+        builder.HasQueryFilter(uw => uw.BanishedById == null);
     }
 }

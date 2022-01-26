@@ -2,26 +2,44 @@ import React from 'react';
 import { StyledSpinnerNext } from 'baseui/spinner';
 
 import Error from '@/components/display/Error';
+import { useStyletron } from 'baseui';
 
 const remoteDataHoc =
   (WrappedComponent) =>
-  ({ request, params = {}, dataKey = 'data', render = null }) => {
+  ({
+    request,
+    params = {},
+    dataKey = 'data',
+    render = null,
+    ...extraProps
+  }) => {
+    const [css] = useStyletron();
     const [data, setData] = React.useState(null);
     const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
       Promise.resolve(request(params)).then(setData).catch(setError);
-    }, [params]);
+    }, []);
 
     if (error) {
       return <Error err={error} />;
     }
 
     if (!data) {
-      return <StyledSpinnerNext size={100} />;
+      return (
+        <div
+          className={css({
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+          })}
+        >
+          <StyledSpinnerNext size={100} />
+        </div>
+      );
     }
 
-    const props = { [dataKey]: data };
+    const props = { ...extraProps, [dataKey]: data };
 
     if (render) {
       return render(props);

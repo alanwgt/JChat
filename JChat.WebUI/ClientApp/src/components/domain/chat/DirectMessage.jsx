@@ -13,9 +13,9 @@ const DM = styled('div', ({ $theme }) => ({
   ...$theme.textBreak,
 }));
 
-const DirectMessage = ({ name }) => {
+const DirectMessage = ({ name, ...props }) => {
   return (
-    <DM>
+    <DM {...props}>
       <UserStatus name={name} />
     </DM>
   );

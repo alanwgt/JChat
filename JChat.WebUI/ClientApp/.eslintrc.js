@@ -27,6 +27,7 @@ module.exports = {
     'default-param-last': 0,
     'react/prop-types': 0,
     'react/jsx-props-no-spreading': 0,
+    'react/jsx-no-bind': 0,
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': ['warn', { extensions: ['.js', '.jsx'] }],
     'import/prefer-default-export': 'off',

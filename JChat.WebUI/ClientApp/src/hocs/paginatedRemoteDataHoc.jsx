@@ -4,7 +4,7 @@ import remoteDataHoc from '@/hocs/remoteDataHoc';
 
 const paginatedRemoteDataHoc =
   (WrappedComponent) =>
-  ({ request, params = {}, dataKey = 'data' }) => {
+  ({ request, params = {}, dataKey = 'data', render = null }) => {
     const [numPages, setNumPages] = React.useState(1);
     const [currPage, setCurrPage] = React.useState(1);
 
@@ -30,6 +30,10 @@ const paginatedRemoteDataHoc =
 
             if (pageNumber !== currPage) setCurrPage(pageNumber);
             if (totalPages !== numPages) setNumPages(totalPages);
+
+            if (render) {
+              return render({ ...{ [dataKey]: data.items } });
+            }
 
             return <WrappedComponent {...{ [dataKey]: data.items }} />;
           }}

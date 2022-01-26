@@ -26,7 +26,9 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
             { typeof(DomainValidationException), HandleDomainValidationException },
             { typeof(ApplicationException), HandleApplicationException },
-            { typeof(ViolatesUniqueKeyConstraintException), HandleUniqueKeyViolationException }
+            { typeof(DomainException), HandleDomainException },
+            { typeof(ViolatesUniqueKeyConstraintException), HandleUniqueKeyViolationException },
+            { typeof(InvalidOperationException), HandleInvalidOperationException }
         };
     }
 
@@ -64,10 +66,10 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         {
             var errs = exc.Errors
                 .ToDictionary(err => err.PropertyName,
-                    err => new string[]
+                    err => new[]
                     {
                         err.ErrorMessage, err.PropertyName,
-                        err.AttemptedValue.ToString()
+                        err.AttemptedValue?.ToString() ?? "None given"
                     });
 
             details = new ValidationProblemDetails(errs)
@@ -195,6 +197,30 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         context.ExceptionHandled = true;
     }
 
+    private static void HandleDomainException(ExceptionContext context)
+    {
+        var exception = (DomainException)context.Exception;
+
+        var details = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "An error occurred while processing your request.",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+        };
+
+        if (exception.Details != null)
+        {
+            details.Detail = exception.Details;
+        }
+
+        context.Result = new ObjectResult(details)
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
+
+        context.ExceptionHandled = true;
+    }
+
     private static void HandleApplicationException(ExceptionContext context)
     {
         var exception = (ApplicationException)context.Exception;
@@ -214,6 +240,26 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         context.Result = new ObjectResult(details)
         {
             StatusCode = StatusCodes.Status409Conflict
+        };
+
+        context.ExceptionHandled = true;
+    }
+
+    private static void HandleInvalidOperationException(ExceptionContext context)
+    {
+        var exception = (InvalidOperationException)context.Exception;
+
+        var details = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "An error occurred while processing your request.",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Detail = "exceptions.resource_not_found"
+        };
+
+        context.Result = new ObjectResult(details)
+        {
+            StatusCode = StatusCodes.Status400BadRequest
         };
 
         context.ExceptionHandled = true;

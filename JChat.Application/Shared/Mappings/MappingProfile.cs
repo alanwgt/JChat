@@ -1,5 +1,7 @@
 using System.Reflection;
 using AutoMapper;
+using JChat.Application.Shared.Dtos;
+using JChat.Domain.Entities.Message;
 
 namespace JChat.Application.Shared.Mappings;
 
@@ -8,6 +10,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         ApplyMappingsForAssembly(Assembly.GetExecutingAssembly());
+        ApplyManualMappings();
     }
 
     private void ApplyMappingsForAssembly(Assembly assembly)
@@ -25,5 +28,12 @@ public class MappingProfile : Profile
 
             methodInfo?.Invoke(instance, new object[] { this });
         }
+    }
+
+    private void ApplyManualMappings()
+    {
+        CreateMap<Reaction, IdNameDto>();
+        CreateMap<MessagePriority, IdNameDto>();
+        CreateMap<MessageType, IdNameDto>();
     }
 }

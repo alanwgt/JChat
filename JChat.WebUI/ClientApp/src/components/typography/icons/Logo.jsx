@@ -12,7 +12,6 @@ const Logo = ({ width = '45px', ...props }) => {
     <div
       className={css({
         width,
-        height: '100%',
       })}
     >
       <svg viewBox='0 0 45 81' {...props}>

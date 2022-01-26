@@ -2,8 +2,17 @@ using JChat.Domain.SeedWork;
 
 namespace JChat.Domain.Entities.Message;
 
-public class MessageHighlight : UserEntity
+public class MessageHighlight : AuditableEntity
 {
     public Guid MessageId { get; protected set; }
-    public Entities.Message.Message Message { get; }
+    public Message Message { get; }
+
+    protected MessageHighlight()
+    {
+    }
+
+    public MessageHighlight(Guid messageId)
+    {
+        MessageId = messageId;
+    }
 }

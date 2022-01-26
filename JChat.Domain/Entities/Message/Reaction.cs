@@ -10,6 +10,10 @@ public class Reaction : Entity
     [Column(TypeName = "char(9)")]
     public string Color { get; protected set; }
 
+    protected Reaction()
+    {
+    }
+
     public Reaction(string name, string icon, string color)
     {
         Name = name;

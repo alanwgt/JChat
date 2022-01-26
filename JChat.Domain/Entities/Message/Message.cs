@@ -3,7 +3,7 @@ using JChat.Domain.SeedWork;
 
 namespace JChat.Domain.Entities.Message;
 
-public class Message : UserEntity
+public class Message : AuditableEntity
 {
     public Guid MessageTypeId { get; protected set; }
     public Guid MessagePriorityId { get; protected set; }
@@ -17,4 +17,19 @@ public class Message : UserEntity
     public MessagePriority MessagePriority { get; }
 
     public IEnumerable<MessageReaction> Reactions { get; } = new List<MessageReaction>();
+
+    protected Message()
+    {
+    }
+
+    public Message(Guid messageTypeId, Guid messagePriorityId, string body, string meta, Guid? replyingToId = null,
+        DateTime? expirationDate = null)
+    {
+        MessageTypeId = messageTypeId;
+        MessagePriorityId = messagePriorityId;
+        ReplyingToId = replyingToId;
+        Body = body;
+        Meta = meta;
+        ExpirationDate = expirationDate;
+    }
 }

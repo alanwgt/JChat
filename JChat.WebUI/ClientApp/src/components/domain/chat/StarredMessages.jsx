@@ -13,7 +13,7 @@ const MessageContainer = styled('div', ({ $theme }) => ({
 
 const StarredMessages = () => (
   <MessageContainer>
-    <Messages />
+    <Messages messages={[]} />
   </MessageContainer>
 );
 

@@ -80,6 +80,7 @@ export class BootClient implements IBootClient {
 export interface IChannelsClient {
     create(command: CreateChannelCommand): Promise<ChannelBriefDto>;
     list(pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelBriefDto>;
+    getChannelDetails(channelId: string): Promise<ChannelDetailedDto>;
     users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined): Promise<PaginatedListOfChannelUserBriefDto>;
     addMember(command: AddUserToChannelCommand, channelId: string): Promise<ChannelUserBriefDto>;
     setAdmin(command: ChangeUserChannelAdmCommand, channelId: string, userId: string): Promise<ChannelUserBriefDto>;
@@ -205,6 +206,57 @@ export class ChannelsClient implements IChannelsClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<PaginatedListOfChannelBriefDto>(<any>null);
+    }
+
+    getChannelDetails(channelId: string , cancelToken?: CancelToken | undefined): Promise<ChannelDetailedDto> {
+        let url_ = this.baseUrl + "/channels/{channelId}";
+        if (channelId === undefined || channelId === null)
+            throw new Error("The parameter 'channelId' must be defined.");
+        url_ = url_.replace("{channelId}", encodeURIComponent("" + channelId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <AxiosRequestConfig>{
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetChannelDetails(_response);
+        });
+    }
+
+    protected processGetChannelDetails(response: AxiosResponse): Promise<ChannelDetailedDto> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = ChannelDetailedDto.fromJS(resultData200);
+            return Promise.resolve<ChannelDetailedDto>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ChannelDetailedDto>(<any>null);
     }
 
     users(channelId: string, pageNumber?: number | undefined, pageSize?: number | undefined , cancelToken?: CancelToken | undefined): Promise<PaginatedListOfChannelUserBriefDto> {
@@ -436,7 +488,7 @@ export class ChannelsClient implements IChannelsClient {
 }
 
 export interface IHookClient {
-    kratosRegistrationHook(kratosUser: User): Promise<FileResponse>;
+    kratosRegistrationHook(kratosUser: User2): Promise<FileResponse>;
 }
 
 export class HookClient implements IHookClient {
@@ -452,7 +504,7 @@ export class HookClient implements IHookClient {
 
     }
 
-    kratosRegistrationHook(kratosUser: User , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    kratosRegistrationHook(kratosUser: User2 , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/hook/kratos/registration";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1432,6 +1484,829 @@ export interface IPaginatedListOfChannelBriefDto {
     hasNextPage?: boolean;
 }
 
+export class ChannelDetailedDto implements IChannelDetailedDto {
+    channel?: ChannelBriefDto;
+    members?: UserBriefDto[];
+    messages?: Message[];
+    messageRecipients?: MessageRecipient[];
+
+    constructor(data?: IChannelDetailedDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.channel = _data["channel"] ? ChannelBriefDto.fromJS(_data["channel"]) : <any>undefined;
+            if (Array.isArray(_data["members"])) {
+                this.members = [] as any;
+                for (let item of _data["members"])
+                    this.members!.push(UserBriefDto.fromJS(item));
+            }
+            if (Array.isArray(_data["messages"])) {
+                this.messages = [] as any;
+                for (let item of _data["messages"])
+                    this.messages!.push(Message.fromJS(item));
+            }
+            if (Array.isArray(_data["messageRecipients"])) {
+                this.messageRecipients = [] as any;
+                for (let item of _data["messageRecipients"])
+                    this.messageRecipients!.push(MessageRecipient.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ChannelDetailedDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelDetailedDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channel"] = this.channel ? this.channel.toJSON() : <any>undefined;
+        if (Array.isArray(this.members)) {
+            data["members"] = [];
+            for (let item of this.members)
+                data["members"].push(item.toJSON());
+        }
+        if (Array.isArray(this.messages)) {
+            data["messages"] = [];
+            for (let item of this.messages)
+                data["messages"].push(item.toJSON());
+        }
+        if (Array.isArray(this.messageRecipients)) {
+            data["messageRecipients"] = [];
+            for (let item of this.messageRecipients)
+                data["messageRecipients"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IChannelDetailedDto {
+    channel?: ChannelBriefDto;
+    members?: UserBriefDto[];
+    messages?: Message[];
+    messageRecipients?: MessageRecipient[];
+}
+
+export class UserBriefDto implements IUserBriefDto {
+    id?: string;
+    username?: string;
+    name?: string;
+
+    constructor(data?: IUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.username = _data["username"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): UserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["username"] = this.username;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IUserBriefDto {
+    id?: string;
+    username?: string;
+    name?: string;
+}
+
+export abstract class Entity implements IEntity {
+    id?: string;
+    createdAt?: moment.Moment;
+    updatedAt?: moment.Moment | undefined;
+    deletedAt?: moment.Moment | undefined;
+
+    constructor(data?: IEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.createdAt = _data["createdAt"] ? moment(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? moment(_data["updatedAt"].toString()) : <any>undefined;
+            this.deletedAt = _data["deletedAt"] ? moment(_data["deletedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): Entity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'Entity' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        data["deletedAt"] = this.deletedAt ? this.deletedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IEntity {
+    id?: string;
+    createdAt?: moment.Moment;
+    updatedAt?: moment.Moment | undefined;
+    deletedAt?: moment.Moment | undefined;
+}
+
+export abstract class AuditableEntity extends Entity implements IAuditableEntity {
+    createdById?: string | undefined;
+    lastModifiedById?: string | undefined;
+    deletedById?: string | undefined;
+    createdBy?: User | undefined;
+    lastModifiedBy?: User | undefined;
+    deletedBy?: User | undefined;
+
+    constructor(data?: IAuditableEntity) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.createdById = _data["createdById"];
+            this.lastModifiedById = _data["lastModifiedById"];
+            this.deletedById = _data["deletedById"];
+            this.createdBy = _data["createdBy"] ? User.fromJS(_data["createdBy"]) : <any>undefined;
+            this.lastModifiedBy = _data["lastModifiedBy"] ? User.fromJS(_data["lastModifiedBy"]) : <any>undefined;
+            this.deletedBy = _data["deletedBy"] ? User.fromJS(_data["deletedBy"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AuditableEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'AuditableEntity' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["createdById"] = this.createdById;
+        data["lastModifiedById"] = this.lastModifiedById;
+        data["deletedById"] = this.deletedById;
+        data["createdBy"] = this.createdBy ? this.createdBy.toJSON() : <any>undefined;
+        data["lastModifiedBy"] = this.lastModifiedBy ? this.lastModifiedBy.toJSON() : <any>undefined;
+        data["deletedBy"] = this.deletedBy ? this.deletedBy.toJSON() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IAuditableEntity extends IEntity {
+    createdById?: string | undefined;
+    lastModifiedById?: string | undefined;
+    deletedById?: string | undefined;
+    createdBy?: User | undefined;
+    lastModifiedBy?: User | undefined;
+    deletedBy?: User | undefined;
+}
+
+export class Message extends AuditableEntity implements IMessage {
+    messageTypeId?: string;
+    messagePriorityId?: string;
+    replyingToId?: string | undefined;
+    body?: string;
+    meta?: string;
+    expirationDate?: moment.Moment | undefined;
+    replyingTo?: Message | undefined;
+    messageType?: MessageType;
+    messagePriority?: MessagePriority;
+    reactions?: MessageReaction[];
+
+    constructor(data?: IMessage) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.messageTypeId = _data["messageTypeId"];
+            this.messagePriorityId = _data["messagePriorityId"];
+            this.replyingToId = _data["replyingToId"];
+            this.body = _data["body"];
+            this.meta = _data["meta"];
+            this.expirationDate = _data["expirationDate"] ? moment(_data["expirationDate"].toString()) : <any>undefined;
+            this.replyingTo = _data["replyingTo"] ? Message.fromJS(_data["replyingTo"]) : <any>undefined;
+            this.messageType = _data["messageType"] ? MessageType.fromJS(_data["messageType"]) : <any>undefined;
+            this.messagePriority = _data["messagePriority"] ? MessagePriority.fromJS(_data["messagePriority"]) : <any>undefined;
+            if (Array.isArray(_data["reactions"])) {
+                this.reactions = [] as any;
+                for (let item of _data["reactions"])
+                    this.reactions!.push(MessageReaction.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): Message {
+        data = typeof data === 'object' ? data : {};
+        let result = new Message();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["messageTypeId"] = this.messageTypeId;
+        data["messagePriorityId"] = this.messagePriorityId;
+        data["replyingToId"] = this.replyingToId;
+        data["body"] = this.body;
+        data["meta"] = this.meta;
+        data["expirationDate"] = this.expirationDate ? this.expirationDate.toISOString() : <any>undefined;
+        data["replyingTo"] = this.replyingTo ? this.replyingTo.toJSON() : <any>undefined;
+        data["messageType"] = this.messageType ? this.messageType.toJSON() : <any>undefined;
+        data["messagePriority"] = this.messagePriority ? this.messagePriority.toJSON() : <any>undefined;
+        if (Array.isArray(this.reactions)) {
+            data["reactions"] = [];
+            for (let item of this.reactions)
+                data["reactions"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IMessage extends IAuditableEntity {
+    messageTypeId?: string;
+    messagePriorityId?: string;
+    replyingToId?: string | undefined;
+    body?: string;
+    meta?: string;
+    expirationDate?: moment.Moment | undefined;
+    replyingTo?: Message | undefined;
+    messageType?: MessageType;
+    messagePriority?: MessagePriority;
+    reactions?: MessageReaction[];
+}
+
+export class MessageType extends Entity implements IMessageType {
+    name?: string;
+
+    constructor(data?: IMessageType) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): MessageType {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessageType();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IMessageType extends IEntity {
+    name?: string;
+}
+
+export class MessagePriority extends Entity implements IMessagePriority {
+    name?: string;
+    priority?: MessagePriorityType;
+
+    constructor(data?: IMessagePriority) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.priority = _data["priority"];
+        }
+    }
+
+    static fromJS(data: any): MessagePriority {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessagePriority();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["priority"] = this.priority;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IMessagePriority extends IEntity {
+    name?: string;
+    priority?: MessagePriorityType;
+}
+
+export enum MessagePriorityType {
+    Normal = 0,
+    Snooze = 50,
+    RequiresConfirmation = 100,
+    RequiresConfirmationAndSnooze = 128,
+}
+
+export class MessageReaction extends AuditableEntity implements IMessageReaction {
+    messageId?: string;
+    reactionId?: string;
+    message?: Message;
+    reaction?: Reaction;
+
+    constructor(data?: IMessageReaction) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.messageId = _data["messageId"];
+            this.reactionId = _data["reactionId"];
+            this.message = _data["message"] ? Message.fromJS(_data["message"]) : <any>undefined;
+            this.reaction = _data["reaction"] ? Reaction.fromJS(_data["reaction"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): MessageReaction {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessageReaction();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["messageId"] = this.messageId;
+        data["reactionId"] = this.reactionId;
+        data["message"] = this.message ? this.message.toJSON() : <any>undefined;
+        data["reaction"] = this.reaction ? this.reaction.toJSON() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IMessageReaction extends IAuditableEntity {
+    messageId?: string;
+    reactionId?: string;
+    message?: Message;
+    reaction?: Reaction;
+}
+
+export class Reaction extends Entity implements IReaction {
+    name?: string;
+    icon?: string;
+    color?: string;
+
+    constructor(data?: IReaction) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            this.icon = _data["icon"];
+            this.color = _data["color"];
+        }
+    }
+
+    static fromJS(data: any): Reaction {
+        data = typeof data === 'object' ? data : {};
+        let result = new Reaction();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["icon"] = this.icon;
+        data["color"] = this.color;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IReaction extends IEntity {
+    name?: string;
+    icon?: string;
+    color?: string;
+}
+
+export class User extends Entity implements IUser {
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+    channels?: ChannelUser[];
+    userWorkspaces?: UserWorkspace[];
+
+    constructor(data?: IUser) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.username = _data["username"];
+            this.firstname = _data["firstname"];
+            this.lastname = _data["lastname"];
+            if (Array.isArray(_data["channels"])) {
+                this.channels = [] as any;
+                for (let item of _data["channels"])
+                    this.channels!.push(ChannelUser.fromJS(item));
+            }
+            if (Array.isArray(_data["userWorkspaces"])) {
+                this.userWorkspaces = [] as any;
+                for (let item of _data["userWorkspaces"])
+                    this.userWorkspaces!.push(UserWorkspace.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): User {
+        data = typeof data === 'object' ? data : {};
+        let result = new User();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["username"] = this.username;
+        data["firstname"] = this.firstname;
+        data["lastname"] = this.lastname;
+        if (Array.isArray(this.channels)) {
+            data["channels"] = [];
+            for (let item of this.channels)
+                data["channels"].push(item.toJSON());
+        }
+        if (Array.isArray(this.userWorkspaces)) {
+            data["userWorkspaces"] = [];
+            for (let item of this.userWorkspaces)
+                data["userWorkspaces"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IUser extends IEntity {
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+    channels?: ChannelUser[];
+    userWorkspaces?: UserWorkspace[];
+}
+
+export class ChannelUser extends Entity implements IChannelUser {
+    channelId?: string;
+    userId?: string;
+    isAdmin?: boolean;
+    channel?: Channel;
+    user?: User;
+
+    constructor(data?: IChannelUser) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.channelId = _data["channelId"];
+            this.userId = _data["userId"];
+            this.isAdmin = _data["isAdmin"];
+            this.channel = _data["channel"] ? Channel.fromJS(_data["channel"]) : <any>undefined;
+            this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ChannelUser {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChannelUser();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["channelId"] = this.channelId;
+        data["userId"] = this.userId;
+        data["isAdmin"] = this.isAdmin;
+        data["channel"] = this.channel ? this.channel.toJSON() : <any>undefined;
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IChannelUser extends IEntity {
+    channelId?: string;
+    userId?: string;
+    isAdmin?: boolean;
+    channel?: Channel;
+    user?: User;
+}
+
+export class Channel extends AuditableEntity implements IChannel {
+    workspaceId?: string;
+    name?: string;
+    isPrivate?: boolean;
+    workspace?: Workspace;
+    users?: ChannelUser[];
+
+    constructor(data?: IChannel) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+            this.name = _data["name"];
+            this.isPrivate = _data["isPrivate"];
+            this.workspace = _data["workspace"] ? Workspace.fromJS(_data["workspace"]) : <any>undefined;
+            if (Array.isArray(_data["users"])) {
+                this.users = [] as any;
+                for (let item of _data["users"])
+                    this.users!.push(ChannelUser.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): Channel {
+        data = typeof data === 'object' ? data : {};
+        let result = new Channel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        data["name"] = this.name;
+        data["isPrivate"] = this.isPrivate;
+        data["workspace"] = this.workspace ? this.workspace.toJSON() : <any>undefined;
+        if (Array.isArray(this.users)) {
+            data["users"] = [];
+            for (let item of this.users)
+                data["users"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IChannel extends IAuditableEntity {
+    workspaceId?: string;
+    name?: string;
+    isPrivate?: boolean;
+    workspace?: Workspace;
+    users?: ChannelUser[];
+}
+
+export class Workspace extends AuditableEntity implements IWorkspace {
+    name?: string;
+    userWorkspaces?: UserWorkspace[];
+    channels?: Channel[];
+
+    constructor(data?: IWorkspace) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.name = _data["name"];
+            if (Array.isArray(_data["userWorkspaces"])) {
+                this.userWorkspaces = [] as any;
+                for (let item of _data["userWorkspaces"])
+                    this.userWorkspaces!.push(UserWorkspace.fromJS(item));
+            }
+            if (Array.isArray(_data["channels"])) {
+                this.channels = [] as any;
+                for (let item of _data["channels"])
+                    this.channels!.push(Channel.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): Workspace {
+        data = typeof data === 'object' ? data : {};
+        let result = new Workspace();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        if (Array.isArray(this.userWorkspaces)) {
+            data["userWorkspaces"] = [];
+            for (let item of this.userWorkspaces)
+                data["userWorkspaces"].push(item.toJSON());
+        }
+        if (Array.isArray(this.channels)) {
+            data["channels"] = [];
+            for (let item of this.channels)
+                data["channels"].push(item.toJSON());
+        }
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWorkspace extends IAuditableEntity {
+    name?: string;
+    userWorkspaces?: UserWorkspace[];
+    channels?: Channel[];
+}
+
+export class UserWorkspace extends AuditableEntity implements IUserWorkspace {
+    workspaceId?: string;
+    userId?: string;
+    admin?: boolean;
+    banishmentReason?: string | undefined;
+    banishedById?: string | undefined;
+    acceptedAt?: moment.Moment | undefined;
+    rejectedAt?: moment.Moment | undefined;
+    workspace?: Workspace;
+    user?: User;
+    banishedBy?: User | undefined;
+
+    constructor(data?: IUserWorkspace) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.workspaceId = _data["workspaceId"];
+            this.userId = _data["userId"];
+            this.admin = _data["admin"];
+            this.banishmentReason = _data["banishmentReason"];
+            this.banishedById = _data["banishedById"];
+            this.acceptedAt = _data["acceptedAt"] ? moment(_data["acceptedAt"].toString()) : <any>undefined;
+            this.rejectedAt = _data["rejectedAt"] ? moment(_data["rejectedAt"].toString()) : <any>undefined;
+            this.workspace = _data["workspace"] ? Workspace.fromJS(_data["workspace"]) : <any>undefined;
+            this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
+            this.banishedBy = _data["banishedBy"] ? User.fromJS(_data["banishedBy"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UserWorkspace {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserWorkspace();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["workspaceId"] = this.workspaceId;
+        data["userId"] = this.userId;
+        data["admin"] = this.admin;
+        data["banishmentReason"] = this.banishmentReason;
+        data["banishedById"] = this.banishedById;
+        data["acceptedAt"] = this.acceptedAt ? this.acceptedAt.toISOString() : <any>undefined;
+        data["rejectedAt"] = this.rejectedAt ? this.rejectedAt.toISOString() : <any>undefined;
+        data["workspace"] = this.workspace ? this.workspace.toJSON() : <any>undefined;
+        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+        data["banishedBy"] = this.banishedBy ? this.banishedBy.toJSON() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IUserWorkspace extends IAuditableEntity {
+    workspaceId?: string;
+    userId?: string;
+    admin?: boolean;
+    banishmentReason?: string | undefined;
+    banishedById?: string | undefined;
+    acceptedAt?: moment.Moment | undefined;
+    rejectedAt?: moment.Moment | undefined;
+    workspace?: Workspace;
+    user?: User;
+    banishedBy?: User | undefined;
+}
+
+export class MessageRecipient extends AuditableEntity implements IMessageRecipient {
+    recipientId?: string;
+    messageId?: string;
+    channelId?: string;
+    forwardedById?: string | undefined;
+    receivedAt?: moment.Moment | undefined;
+    readAt?: moment.Moment | undefined;
+    confirmedVisualizationAt?: moment.Moment | undefined;
+    recipient?: User;
+    forwardedBy?: MessageRecipient | undefined;
+    message?: Message;
+    channel?: Channel;
+
+    constructor(data?: IMessageRecipient) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.recipientId = _data["recipientId"];
+            this.messageId = _data["messageId"];
+            this.channelId = _data["channelId"];
+            this.forwardedById = _data["forwardedById"];
+            this.receivedAt = _data["receivedAt"] ? moment(_data["receivedAt"].toString()) : <any>undefined;
+            this.readAt = _data["readAt"] ? moment(_data["readAt"].toString()) : <any>undefined;
+            this.confirmedVisualizationAt = _data["confirmedVisualizationAt"] ? moment(_data["confirmedVisualizationAt"].toString()) : <any>undefined;
+            this.recipient = _data["recipient"] ? User.fromJS(_data["recipient"]) : <any>undefined;
+            this.forwardedBy = _data["forwardedBy"] ? MessageRecipient.fromJS(_data["forwardedBy"]) : <any>undefined;
+            this.message = _data["message"] ? Message.fromJS(_data["message"]) : <any>undefined;
+            this.channel = _data["channel"] ? Channel.fromJS(_data["channel"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): MessageRecipient {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessageRecipient();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["recipientId"] = this.recipientId;
+        data["messageId"] = this.messageId;
+        data["channelId"] = this.channelId;
+        data["forwardedById"] = this.forwardedById;
+        data["receivedAt"] = this.receivedAt ? this.receivedAt.toISOString() : <any>undefined;
+        data["readAt"] = this.readAt ? this.readAt.toISOString() : <any>undefined;
+        data["confirmedVisualizationAt"] = this.confirmedVisualizationAt ? this.confirmedVisualizationAt.toISOString() : <any>undefined;
+        data["recipient"] = this.recipient ? this.recipient.toJSON() : <any>undefined;
+        data["forwardedBy"] = this.forwardedBy ? this.forwardedBy.toJSON() : <any>undefined;
+        data["message"] = this.message ? this.message.toJSON() : <any>undefined;
+        data["channel"] = this.channel ? this.channel.toJSON() : <any>undefined;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IMessageRecipient extends IAuditableEntity {
+    recipientId?: string;
+    messageId?: string;
+    channelId?: string;
+    forwardedById?: string | undefined;
+    receivedAt?: moment.Moment | undefined;
+    readAt?: moment.Moment | undefined;
+    confirmedVisualizationAt?: moment.Moment | undefined;
+    recipient?: User;
+    forwardedBy?: MessageRecipient | undefined;
+    message?: Message;
+    channel?: Channel;
+}
+
 export class PaginatedListOfChannelUserBriefDto implements IPaginatedListOfChannelUserBriefDto {
     items?: ChannelUserBriefDto[];
     pageNumber?: number;
@@ -1864,13 +2739,13 @@ export interface ICreateMessageCommand extends IChannelScopedRequestOfMessageBri
     expirationDate?: moment.Moment | undefined;
 }
 
-export class User implements IUser {
+export class User2 implements IUser2 {
     id?: string;
     username?: string;
     firstname?: string;
     lastname?: string;
 
-    constructor(data?: IUser) {
+    constructor(data?: IUser2) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1888,9 +2763,9 @@ export class User implements IUser {
         }
     }
 
-    static fromJS(data: any): User {
+    static fromJS(data: any): User2 {
         data = typeof data === 'object' ? data : {};
-        let result = new User();
+        let result = new User2();
         result.init(data);
         return result;
     }
@@ -1905,7 +2780,7 @@ export class User implements IUser {
     }
 }
 
-export interface IUser {
+export interface IUser2 {
     id?: string;
     username?: string;
     firstname?: string;
@@ -1974,50 +2849,6 @@ export interface IPaginatedListOfUserBriefDto {
     totalCount?: number;
     hasPreviousPage?: boolean;
     hasNextPage?: boolean;
-}
-
-export class UserBriefDto implements IUserBriefDto {
-    id?: string;
-    username?: string;
-    name?: string;
-
-    constructor(data?: IUserBriefDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.username = _data["username"];
-            this.name = _data["name"];
-        }
-    }
-
-    static fromJS(data: any): UserBriefDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserBriefDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["username"] = this.username;
-        data["name"] = this.name;
-        return data;
-    }
-}
-
-export interface IUserBriefDto {
-    id?: string;
-    username?: string;
-    name?: string;
 }
 
 export class PaginatedListOfWorkspaceBriefDto implements IPaginatedListOfWorkspaceBriefDto {

@@ -19,7 +19,7 @@ const CreateWorkspaceModal = ({ onCreate, ...props }) => {
 
   return (
     <Modal
-      title={t('worspace.modal.create.title')}
+      title={t('worspaces.modal.create.title')}
       {...props}
       onPositive={handleSubmit(onSubmit)}
     >
@@ -27,13 +27,13 @@ const CreateWorkspaceModal = ({ onCreate, ...props }) => {
         <FormInput
           name='name'
           formControl={control}
-          label='workspace.modal.input.name'
+          label='workspaces.modal.input.name'
           rules={{ minLength: 3, maxLength: 50, required: true }}
-          render={({ field }, hasError) => (
+          render={({ field, hasError }) => (
             <Input
               {...field}
               error={hasError}
-              placeholder={t('workspace.modal.input.name.placeholder')}
+              placeholder={t('workspaces.modal.input.name.placeholder')}
             />
           )}
         />

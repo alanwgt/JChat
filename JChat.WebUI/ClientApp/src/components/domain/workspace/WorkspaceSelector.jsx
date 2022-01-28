@@ -25,7 +25,7 @@ const WorkspaceSelector = ({ selectWorkspace }) => {
   const onCreate = (workspace) => {
     setWorkspacesList([...workspacesList, workspace]);
     setModalIsOpen(false);
-    feedbackUtils.positive(t('workspace.created.messsage'));
+    feedbackUtils.positive(t('workspaces.created.messsage'));
   };
 
   return (
@@ -37,7 +37,6 @@ const WorkspaceSelector = ({ selectWorkspace }) => {
 
         return (
           <>
-            {' '}
             <CreateWorkspaceModal
               onCreate={onCreate}
               isOpen={modalIsOpen}
@@ -55,7 +54,7 @@ const WorkspaceSelector = ({ selectWorkspace }) => {
                     marginBottom: '20px',
                   }}
                 >
-                  {t('workspace.selector.title')}
+                  {t('workspaces.selector.title')}
                 </HeadingMedium>
                 <div
                   className={css({
@@ -65,14 +64,14 @@ const WorkspaceSelector = ({ selectWorkspace }) => {
                   })}
                 >
                   <ParagraphSmall>
-                    {t('workspace.selector.description')}
+                    {t('workspaces.selector.description')}
                   </ParagraphSmall>
                   <AddResourceButton
                     onClick={() => {
                       setModalIsOpen(true);
                     }}
                   >
-                    {t('workspace.add.btn')}
+                    {t('workspaces.add.btn')}
                   </AddResourceButton>
                 </div>
               </div>

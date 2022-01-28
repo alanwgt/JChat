@@ -36,7 +36,7 @@ const UserMenu = ({ changeWorkspace }) => {
         <StatefulMenu
           items={[
             {
-              label: t('workspace.change'),
+              label: t('workspaces.change'),
               action: MenuActionType.ChangeWorkspace,
             },
             { label: t('auth.logout'), action: MenuActionType.Logout },

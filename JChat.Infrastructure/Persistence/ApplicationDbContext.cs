@@ -26,7 +26,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<MessagePriority> MessagePriorities => Set<MessagePriority>();
     public DbSet<MessageReaction> MessageReactions => Set<MessageReaction>();
     public DbSet<MessageRecipient> MessageRecipients => Set<MessageRecipient>();
-    public DbSet<MessageType> MessageTypes => Set<MessageType>();
+    public DbSet<MessageBodyType> MessageBodyTypes => Set<MessageBodyType>();
+    public DbSet<MessageProjection> MessageProjections => Set<MessageProjection>();
     public DbSet<Reaction> Reactions => Set<Reaction>();
     public DbSet<ChannelUser> ChannelUsers => Set<ChannelUser>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();

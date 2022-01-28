@@ -7,6 +7,7 @@ namespace JChat.Infrastructure.Persistence;
 public class ApplicationDbContextSeeder
 {
     private readonly ModelBuilder _modelBuilder;
+
     public ApplicationDbContextSeeder(ModelBuilder modelBuilder)
     {
         _modelBuilder = modelBuilder;
@@ -34,13 +35,13 @@ public class ApplicationDbContextSeeder
 
     private void SeedMessageTypes()
     {
-        var entity = _modelBuilder.Entity<MessageType>();
+        var entity = _modelBuilder.Entity<MessageBodyType>();
 
-        entity.HasData(new MessageType("message.type.audio"));
-        entity.HasData(new MessageType("message.type.gif"));
-        entity.HasData(new MessageType("message.type.image"));
-        entity.HasData(new MessageType("message.type.text"));
-        entity.HasData(new MessageType("message.type.video"));
+        entity.HasData(new MessageBodyType("message.type.audio", MessageBody.Audio));
+        entity.HasData(new MessageBodyType("message.type.gif", MessageBody.Gif));
+        entity.HasData(new MessageBodyType("message.type.image", MessageBody.Image));
+        entity.HasData(new MessageBodyType("message.type.text", MessageBody.Text));
+        entity.HasData(new MessageBodyType("message.type.video", MessageBody.Video));
     }
 
     private void SeedMessagePriorities()
@@ -49,7 +50,9 @@ public class ApplicationDbContextSeeder
 
         entity.HasData(new MessagePriority("message.priority.normal", MessagePriorityType.Normal));
         entity.HasData(new MessagePriority("message.priority.snooze", MessagePriorityType.Snooze));
-        entity.HasData(new MessagePriority("message.priority.requires_confirmation", MessagePriorityType.RequiresConfirmation));
-        entity.HasData(new MessagePriority("message.priority.requires_confirmation_snooze", MessagePriorityType.RequiresConfirmationAndSnooze));
+        entity.HasData(new MessagePriority("message.priority.requires_confirmation",
+            MessagePriorityType.RequiresConfirmation));
+        entity.HasData(new MessagePriority("message.priority.requires_confirmation_snooze",
+            MessagePriorityType.RequiresConfirmationAndSnooze));
     }
 }

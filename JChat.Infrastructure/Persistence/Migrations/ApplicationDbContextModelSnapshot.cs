@@ -205,6 +205,77 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.ToTable("messages", (string)null);
                 });
 
+            modelBuilder.Entity("JChat.Domain.Entities.Message.MessageBodyType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("BodyType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("body_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_message_body_types");
+
+                    b.ToTable("message_body_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d79fc8df-fda7-4ec5-b83e-dc4b05853df2"),
+                            BodyType = (short)1,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.audio"
+                        },
+                        new
+                        {
+                            Id = new Guid("3eb4f953-c45f-4076-b9e7-ecc3484b89d3"),
+                            BodyType = (short)4,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.gif"
+                        },
+                        new
+                        {
+                            Id = new Guid("e01c901d-3beb-49a2-8625-2e3d51bbc127"),
+                            BodyType = (short)2,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.image"
+                        },
+                        new
+                        {
+                            Id = new Guid("b6db22e2-bd19-41b0-8b8d-c5ce3f1cf1e0"),
+                            BodyType = (short)0,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.text"
+                        },
+                        new
+                        {
+                            Id = new Guid("319f34b9-af34-447d-bb6a-cab9143fa96b"),
+                            BodyType = (short)3,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "message.type.video"
+                        });
+                });
+
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageHighlight", b =>
                 {
                     b.Property<Guid>("Id")
@@ -291,32 +362,118 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("633f5c7a-d1b6-4b9f-8bf7-2dbe53ce9922"),
+                            Id = new Guid("b33c075f-f5d3-4ee4-8cc2-0248d8ec1d1e"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "message.priority.normal",
                             Priority = (short)0
                         },
                         new
                         {
-                            Id = new Guid("b01b3ea0-e48f-4a3e-aad9-d3b26cfdedad"),
+                            Id = new Guid("19b2180a-ed00-4bad-9fe2-fb3c09119303"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "message.priority.snooze",
                             Priority = (short)50
                         },
                         new
                         {
-                            Id = new Guid("2f0d6895-2f60-43d2-82a6-3e5d361ab1de"),
+                            Id = new Guid("d05c7d68-0413-493b-ac1d-70c26a0a0b0c"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "message.priority.requires_confirmation",
                             Priority = (short)100
                         },
                         new
                         {
-                            Id = new Guid("17b04c0f-58f3-48ba-901f-0c8266469d3f"),
+                            Id = new Guid("47ed3f27-b5ad-4570-b0a2-70551231010e"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "message.priority.requires_confirmation_snooze",
                             Priority = (short)128
                         });
+                });
+
+            modelBuilder.Entity("JChat.Domain.Entities.Message.MessageProjection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<int>("BodyType")
+                        .HasColumnType("integer")
+                        .HasColumnName("body_type");
+
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("channel_id");
+
+                    b.Property<DateTime?>("ConfirmedVisualizationAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_visualization_at");
+
+                    b.Property<Guid?>("ForwardedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("forwarded_by_id");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Meta")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("meta");
+
+                    b.Property<Guid>("PriorityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("priority_id");
+
+                    b.Property<string>("Reactions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reactions");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.Property<DateTime?>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipient_id");
+
+                    b.Property<Guid?>("ReplyingToId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("replying_to_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_message_projections");
+
+                    b.HasIndex("ForwardedById")
+                        .HasDatabaseName("ix_message_projections_forwarded_by_id");
+
+                    b.HasIndex("MessageId")
+                        .HasDatabaseName("ix_message_projections_message_id");
+
+                    b.HasIndex("PriorityId")
+                        .HasDatabaseName("ix_message_projections_priority_id");
+
+                    b.HasIndex("RecipientId")
+                        .HasDatabaseName("ix_message_projections_recipient_id");
+
+                    b.HasIndex("ReplyingToId")
+                        .HasDatabaseName("ix_message_projections_replying_to_id");
+
+                    b.HasIndex("ChannelId", "RecipientId")
+                        .HasDatabaseName("ix_message_projections_channel_id_recipient_id");
+
+                    b.ToTable("message_projections", (string)null);
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageReaction", b =>
@@ -450,69 +607,10 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.HasIndex("LastModifiedById")
                         .HasDatabaseName("ix_message_recipients_last_modified_by_id");
 
+                    b.HasIndex("MessageId")
+                        .HasDatabaseName("ix_message_recipients_message_id");
+
                     b.ToTable("message_recipients", (string)null);
-                });
-
-            modelBuilder.Entity("JChat.Domain.Entities.Message.MessageType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_message_types");
-
-                    b.ToTable("message_types", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("0ef0564b-7b4a-49fb-92c7-7ab14067716b"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "message.type.audio"
-                        },
-                        new
-                        {
-                            Id = new Guid("5ddb5056-ddf4-4b1b-9cc0-3a7f232b8148"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "message.type.gif"
-                        },
-                        new
-                        {
-                            Id = new Guid("90f23ea7-ddcc-423e-ad40-a37bc9c8bc80"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "message.type.image"
-                        },
-                        new
-                        {
-                            Id = new Guid("65cab42b-3ff7-4f13-b90f-91abaa8228f1"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "message.type.text"
-                        },
-                        new
-                        {
-                            Id = new Guid("001dbae7-c0d5-43bc-8ce8-2d0e0ec2c54d"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "message.type.video"
-                        });
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.Message.Reaction", b =>
@@ -557,7 +655,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ec025488-93e2-42a8-927c-7cb586bb3301"),
+                            Id = new Guid("08f5332a-bf09-4432-a704-c3ce1d19ff06"),
                             Color = "1A85BA",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "thumbs-up",
@@ -565,7 +663,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("5cc8585c-c6de-49fc-b15b-614d2b3988c1"),
+                            Id = new Guid("23615f68-f0fb-43d6-ae1f-29c208f81ef1"),
                             Color = "6EAD51",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "celebrate",
@@ -573,7 +671,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c05b0de3-541e-4cdb-bcbb-b9f3aaef0187"),
+                            Id = new Guid("910ce222-b526-46e4-a7c9-6bf73bd9861a"),
                             Color = "DA7150",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "love",
@@ -581,7 +679,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9514777c-4d6a-4c93-8a85-489405a7828a"),
+                            Id = new Guid("61bb08a5-de68-4b84-8450-a99ba5a796b4"),
                             Color = "F0B85F",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "insightful",
@@ -589,7 +687,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("4abe01ae-55ce-4976-be42-29069dc74b68"),
+                            Id = new Guid("028bc8f7-00d0-4ba4-8ec6-5adab2e39351"),
                             Color = "DCB9DA",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "curious",
@@ -597,7 +695,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("843c64cb-c38a-431f-93a5-096655efca0a"),
+                            Id = new Guid("fcb06e77-80eb-4f8e-9ef0-cd715e488fff"),
                             Color = "CE5044",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "rocket",
@@ -605,7 +703,7 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = new Guid("cca15e67-9ee5-47ea-bcfa-15061d97f70f"),
+                            Id = new Guid("da361619-dca3-4835-8d8a-00487f031bc6"),
                             Color = "FFFFFF",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Icon = "eyes",
@@ -888,6 +986,59 @@ namespace JChat.Infrastructure.Persistence.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
+            modelBuilder.Entity("JChat.Domain.Entities.Message.MessageProjection", b =>
+                {
+                    b.HasOne("JChat.Domain.Entities.Channel.Channel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_projections_channels_channel_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "ForwardedBy")
+                        .WithMany()
+                        .HasForeignKey("ForwardedById")
+                        .HasConstraintName("fk_message_projections_users_forwarded_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.Message.Message", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_projections_messages_message_id");
+
+                    b.HasOne("JChat.Domain.Entities.Message.MessagePriority", "Priority")
+                        .WithMany()
+                        .HasForeignKey("PriorityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_projections_message_priorities_priority_id");
+
+                    b.HasOne("JChat.Domain.Entities.User.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_projections_users_recipient_id");
+
+                    b.HasOne("JChat.Domain.Entities.Message.Message", "ReplyingTo")
+                        .WithMany()
+                        .HasForeignKey("ReplyingToId")
+                        .HasConstraintName("fk_message_projections_messages_replying_to_id");
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("ForwardedBy");
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Priority");
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("ReplyingTo");
+                });
+
             modelBuilder.Entity("JChat.Domain.Entities.Message.MessageReaction", b =>
                 {
                     b.HasOne("JChat.Domain.Entities.User.User", "CreatedBy")
@@ -940,6 +1091,13 @@ namespace JChat.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasConstraintName("fk_message_recipients_users_last_modified_by_id");
+
+                    b.HasOne("JChat.Domain.Entities.Message.Message", null)
+                        .WithMany("Recipients")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_recipients_messages_message_id");
 
                     b.Navigation("CreatedBy");
 
@@ -1024,6 +1182,8 @@ namespace JChat.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("JChat.Domain.Entities.Message.Message", b =>
                 {
                     b.Navigation("Reactions");
+
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("JChat.Domain.Entities.User.User", b =>

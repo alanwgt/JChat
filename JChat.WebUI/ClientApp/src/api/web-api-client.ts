@@ -1705,9 +1705,10 @@ export class Message extends AuditableEntity implements IMessage {
     meta?: string;
     expirationDate?: moment.Moment | undefined;
     replyingTo?: Message | undefined;
-    messageType?: MessageType;
+    messageBodyType?: MessageBodyType;
     messagePriority?: MessagePriority;
     reactions?: MessageReaction[];
+    recipients?: MessageRecipient[];
 
     constructor(data?: IMessage) {
         super(data);
@@ -1723,12 +1724,17 @@ export class Message extends AuditableEntity implements IMessage {
             this.meta = _data["meta"];
             this.expirationDate = _data["expirationDate"] ? moment(_data["expirationDate"].toString()) : <any>undefined;
             this.replyingTo = _data["replyingTo"] ? Message.fromJS(_data["replyingTo"]) : <any>undefined;
-            this.messageType = _data["messageType"] ? MessageType.fromJS(_data["messageType"]) : <any>undefined;
+            this.messageBodyType = _data["messageBodyType"] ? MessageBodyType.fromJS(_data["messageBodyType"]) : <any>undefined;
             this.messagePriority = _data["messagePriority"] ? MessagePriority.fromJS(_data["messagePriority"]) : <any>undefined;
             if (Array.isArray(_data["reactions"])) {
                 this.reactions = [] as any;
                 for (let item of _data["reactions"])
                     this.reactions!.push(MessageReaction.fromJS(item));
+            }
+            if (Array.isArray(_data["recipients"])) {
+                this.recipients = [] as any;
+                for (let item of _data["recipients"])
+                    this.recipients!.push(MessageRecipient.fromJS(item));
             }
         }
     }
@@ -1749,12 +1755,17 @@ export class Message extends AuditableEntity implements IMessage {
         data["meta"] = this.meta;
         data["expirationDate"] = this.expirationDate ? this.expirationDate.toISOString() : <any>undefined;
         data["replyingTo"] = this.replyingTo ? this.replyingTo.toJSON() : <any>undefined;
-        data["messageType"] = this.messageType ? this.messageType.toJSON() : <any>undefined;
+        data["messageBodyType"] = this.messageBodyType ? this.messageBodyType.toJSON() : <any>undefined;
         data["messagePriority"] = this.messagePriority ? this.messagePriority.toJSON() : <any>undefined;
         if (Array.isArray(this.reactions)) {
             data["reactions"] = [];
             for (let item of this.reactions)
                 data["reactions"].push(item.toJSON());
+        }
+        if (Array.isArray(this.recipients)) {
+            data["recipients"] = [];
+            for (let item of this.recipients)
+                data["recipients"].push(item.toJSON());
         }
         super.toJSON(data);
         return data;
@@ -1769,15 +1780,17 @@ export interface IMessage extends IAuditableEntity {
     meta?: string;
     expirationDate?: moment.Moment | undefined;
     replyingTo?: Message | undefined;
-    messageType?: MessageType;
+    messageBodyType?: MessageBodyType;
     messagePriority?: MessagePriority;
     reactions?: MessageReaction[];
+    recipients?: MessageRecipient[];
 }
 
-export class MessageType extends Entity implements IMessageType {
+export class MessageBodyType extends Entity implements IMessageBodyType {
     name?: string;
+    bodyType?: MessageBody;
 
-    constructor(data?: IMessageType) {
+    constructor(data?: IMessageBodyType) {
         super(data);
     }
 
@@ -1785,12 +1798,13 @@ export class MessageType extends Entity implements IMessageType {
         super.init(_data);
         if (_data) {
             this.name = _data["name"];
+            this.bodyType = _data["bodyType"];
         }
     }
 
-    static fromJS(data: any): MessageType {
+    static fromJS(data: any): MessageBodyType {
         data = typeof data === 'object' ? data : {};
-        let result = new MessageType();
+        let result = new MessageBodyType();
         result.init(data);
         return result;
     }
@@ -1798,13 +1812,23 @@ export class MessageType extends Entity implements IMessageType {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["name"] = this.name;
+        data["bodyType"] = this.bodyType;
         super.toJSON(data);
         return data;
     }
 }
 
-export interface IMessageType extends IEntity {
+export interface IMessageBodyType extends IEntity {
     name?: string;
+    bodyType?: MessageBody;
+}
+
+export enum MessageBody {
+    Text = 0,
+    Audio = 1,
+    Image = 2,
+    Video = 3,
+    Gif = 4,
 }
 
 export class MessagePriority extends Entity implements IMessagePriority {
@@ -2696,7 +2720,7 @@ export interface IChannelScopedRequestOfMessageBriefDto extends IWorkspaceScoped
 
 export class CreateMessageCommand extends ChannelScopedRequestOfMessageBriefDto implements ICreateMessageCommand {
     body?: string;
-    type?: string;
+    bodyType?: string;
     priority?: string;
     expirationDate?: moment.Moment | undefined;
 
@@ -2708,7 +2732,7 @@ export class CreateMessageCommand extends ChannelScopedRequestOfMessageBriefDto 
         super.init(_data);
         if (_data) {
             this.body = _data["body"];
-            this.type = _data["type"];
+            this.bodyType = _data["bodyType"];
             this.priority = _data["priority"];
             this.expirationDate = _data["expirationDate"] ? moment(_data["expirationDate"].toString()) : <any>undefined;
         }
@@ -2724,7 +2748,7 @@ export class CreateMessageCommand extends ChannelScopedRequestOfMessageBriefDto 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["body"] = this.body;
-        data["type"] = this.type;
+        data["bodyType"] = this.bodyType;
         data["priority"] = this.priority;
         data["expirationDate"] = this.expirationDate ? this.expirationDate.toISOString() : <any>undefined;
         super.toJSON(data);
@@ -2734,7 +2758,7 @@ export class CreateMessageCommand extends ChannelScopedRequestOfMessageBriefDto 
 
 export interface ICreateMessageCommand extends IChannelScopedRequestOfMessageBriefDto {
     body?: string;
-    type?: string;
+    bodyType?: string;
     priority?: string;
     expirationDate?: moment.Moment | undefined;
 }

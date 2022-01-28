@@ -17,7 +17,8 @@ public interface IApplicationDbContext
    DbSet<MessagePriority> MessagePriorities { get; }
    DbSet<MessageReaction> MessageReactions { get; }
    DbSet<MessageRecipient> MessageRecipients { get; }
-   DbSet<MessageType> MessageTypes { get; }
+   DbSet<MessageBodyType> MessageBodyTypes { get; }
+   DbSet<MessageProjection> MessageProjections { get; }
    DbSet<Reaction> Reactions { get; }
    DbSet<ChannelUser> ChannelUsers { get; }
    DbSet<UserWorkspace> UserWorkspaces { get; }

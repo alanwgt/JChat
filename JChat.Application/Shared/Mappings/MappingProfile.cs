@@ -34,6 +34,6 @@ public class MappingProfile : Profile
     {
         CreateMap<Reaction, IdNameDto>();
         CreateMap<MessagePriority, IdNameDto>();
-        CreateMap<MessageType, IdNameDto>();
+        CreateMap<MessageBodyType, IdNameDto>();
     }
 }

@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/extensions,import/no-unresolved
-import * as ApiDeclaration from './web-api-client';
 import axios from '@/services/axios.service';
+
+import * as ApiDeclaration from './web-api-client';
 
 export const Boot = new ApiDeclaration.BootClient(
   'http://api.jchat.alanwgt.com',

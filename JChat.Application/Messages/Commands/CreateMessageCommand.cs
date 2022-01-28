@@ -2,6 +2,7 @@ using AutoMapper;
 using FluentValidation;
 using JChat.Application.Channels.Queries;
 using JChat.Application.Shared.CQRS;
+using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Security;
 using JChat.Domain.Entities.Message;
@@ -15,7 +16,7 @@ namespace JChat.Application.Messages.Commands;
 public class CreateMessageCommand : ChannelScopedRequest<MessageBriefDto>
 {
     public string Body { get; set; }
-    public Guid Type { get; set; }
+    public Guid BodyType { get; set; }
     public Guid Priority { get; set; }
     public DateTime? ExpirationDate { get; set; }
 }
@@ -26,7 +27,7 @@ public class CreateMessageCommandValidator : AbstractValidator<CreateMessageComm
     {
         RuleFor(c => c.Body)
             .NotEmpty();
-        RuleFor(c => c.Type)
+        RuleFor(c => c.BodyType)
             .NotEmpty();
         RuleFor(c => c.Priority)
             .NotEmpty();
@@ -54,14 +55,17 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
                 .Where(cu => cu.ChannelId == request.ChannelId)
                 .ToListAsync(cancellationToken);
 
+            var messageBodyType = await _context.MessageBodyTypes
+                .FindAsync(new object?[] { request.BodyType }, cancellationToken)
+                    ?? throw new NotFoundException("message body type", request.BodyType);
+
             if (!recipients.Any())
             {
                 throw new ApplicationException{ Details = "there is no user in the given channel" };
             }
 
-
             var message = new Message(
-                request.Type,
+                messageBodyType.Id,
                 request.Priority,
                 request.Body,
                 "",
@@ -70,10 +74,23 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
             );
             _context.Messages.Add(message);
 
-            var messageRecipients = recipients
-                .Select(recipient => new MessageRecipient(recipient.UserId, message.Id, request.ChannelId));
+            foreach (var recipient in recipients)
+            {
+                message.AddRecipient(new MessageRecipient(recipient.UserId, message.Id, request.ChannelId));
+                await _context.MessageProjections.AddAsync(new MessageProjection
+                {
+                    ChannelId = request.ChannelId,
+                    MessageId = message.Id,
+                    Body = message.Body,
+                    Meta = message.Meta,
+                    Priority = message.MessagePriority,
+                    Reactions = "[]",
+                    BodyType = messageBodyType.BodyType,
+                    RecipientId = recipient.Id,
+                },cancellationToken);
+            }
 
-            await _context.MessageRecipients.AddRangeAsync(messageRecipients, cancellationToken);
+
             await _context.SaveChangesAsync(cancellationToken);
 
             // TODO: notification

@@ -36,7 +36,7 @@ public class GetBootQueryHandler : IRequestHandler<GetBootQuery, BootDto>
         var reactions = await _context.Reactions
             .ProjectTo<IdNameDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-        var types = await _context.MessageTypes
+        var types = await _context.MessageBodyTypes
             .ProjectTo<IdNameDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

@@ -947,8 +947,8 @@
                   }
                 ]
               },
-              "messageType": {
-                "$ref": "#/components/schemas/MessageType"
+              "messageBodyType": {
+                "$ref": "#/components/schemas/MessageBodyType"
               },
               "messagePriority": {
                 "$ref": "#/components/schemas/MessagePriority"
@@ -958,12 +958,18 @@
                 "items": {
                   "$ref": "#/components/schemas/MessageReaction"
                 }
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageRecipient"
+                }
               }
             }
           }
         ]
       },
-      "MessageType": {
+      "MessageBodyType": {
         "allOf": [
           {
             "$ref": "#/components/schemas/Entity"
@@ -974,9 +980,30 @@
             "properties": {
               "name": {
                 "type": "string"
+              },
+              "bodyType": {
+                "$ref": "#/components/schemas/MessageBody"
               }
             }
           }
+        ]
+      },
+      "MessageBody": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Text",
+          "Audio",
+          "Image",
+          "Video",
+          "Gif"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
         ]
       },
       "Entity": {
@@ -1519,7 +1546,7 @@
               "body": {
                 "type": "string"
               },
-              "type": {
+              "bodyType": {
                 "type": "string",
                 "format": "guid"
               },

@@ -4,18 +4,17 @@ import { styled } from 'baseui';
 
 import Explorer from '@/components/domain/chat/Explorer';
 
-const Container = styled('div', {
+const Container = styled('div', ({ $theme }) => ({
   overflowY: 'auto',
-});
-
-const StyledExplorer = styled(Explorer, ({ $theme }) => ({
   backgroundColor: $theme.colors.black,
   width: '250px',
+  maxWidth: '250px',
+  display: 'block',
 }));
 
 const Sidebar = () => (
   <Container>
-    <StyledExplorer />
+    <Explorer />
   </Container>
 );
 

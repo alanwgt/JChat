@@ -5,7 +5,7 @@ import JChatPanel from '@/components/panels/JChatPanel';
 
 const Routes = ({ ...props }) => (
   <RRDRoutes {...props}>
-    <Route path='/channel/:channelId' element={<Chat />} />
+    <Route path='/channels/:channelId' element={<Chat />} />
     <Route path='*' element={<JChatPanel />} />
   </RRDRoutes>
 );

@@ -1,33 +1,63 @@
 import React from 'react';
 
-import { styled } from 'baseui';
+import { useStyletron } from 'baseui';
 import { useTranslation } from 'react-i18next';
+import { matchPath, useLocation } from 'react-router-dom';
 
-import DirectMessage from '@/components/domain/chat/DirectMessage';
-import Downloadable from '@/components/data-display/Downloadable';
 import { Channels } from '@/api';
-
-const StyledPanel = styled('div', ({ $theme }) => ({
-  padding: `0 5px ${$theme.padding} 5px`,
-}));
+import Downloadable from '@/components/data-display/Downloadable';
+import ChannelListContainer from '@/components/domain/chat/ChannelListContainer';
+import CreateChannelModal from '@/components/domain/chat/CreateChannelModal';
+import DirectMessage from '@/components/domain/chat/DirectMessage';
+import feedbackUtils from '@/utils/feedback.utils';
 
 const Explorer = ({ ...props }) => {
+  const [modalIsOpen, setModalIsOpen] = React.useState(false);
+  const { pathname } = useLocation();
+  const [css] = useStyletron();
   const { t } = useTranslation();
+  const {
+    params: { channelId },
+  } = matchPath('/channels/:channelId', pathname) || { params: {} };
+
+  const onCreate = (channel) => {
+    feedbackUtils.positive(t('channels.created.message'));
+    setModalIsOpen(false);
+  };
 
   return (
-    <div {...props}>
-      <Downloadable
-        request={Channels.list.bind(Channels)}
-        render={({ data: { items } }) => (
-          <StyledPanel header={t('explorer.channels')} key='1'>
-            {items.map(({ id, name }) => (
-              <DirectMessage key={id} name={name} />
-            ))}
-          </StyledPanel>
-        )}
+    <>
+      <CreateChannelModal
+        onCreate={onCreate}
+        isOpen={modalIsOpen}
+        setIsOpen={setModalIsOpen}
       />
-      <StyledPanel header={t('explorer.direct')} key='2'></StyledPanel>
-    </div>
+      <div {...props}>
+        <ChannelListContainer
+          title={t('explorer.channels')}
+          onAdd={() => {
+            setModalIsOpen(true);
+          }}
+        >
+          <Downloadable
+            request={Channels.list.bind(Channels)}
+            render={({ data: { items } }) =>
+              items.map(({ id, name }) => (
+                <DirectMessage
+                  key={id}
+                  id={id}
+                  isActive={channelId === id}
+                  name={name}
+                />
+              ))
+            }
+          />
+        </ChannelListContainer>
+        <ChannelListContainer
+          title={t('explorer.direct')}
+        ></ChannelListContainer>
+      </div>
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { StyledSpinnerNext } from 'baseui/spinner';
 
 import Error from '@/components/display/Error';
@@ -16,10 +17,16 @@ const remoteDataHoc =
     const [css] = useStyletron();
     const [data, setData] = React.useState(null);
     const [error, setError] = React.useState(null);
+    const [lastRequestParams, setLastRequestParams] = React.useState(null);
 
     React.useEffect(() => {
+      if (_.isEqual(lastRequestParams, params)) {
+        return;
+      }
+
+      setLastRequestParams(params);
       Promise.resolve(request(params)).then(setData).catch(setError);
-    }, []);
+    }, [params]);
 
     if (error) {
       return <Error err={error} />;

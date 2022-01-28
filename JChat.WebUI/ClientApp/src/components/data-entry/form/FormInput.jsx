@@ -32,7 +32,7 @@ const FormInput = ({
             );
           }
 
-          return render(props, !!fieldError);
+          return render({ ...props, hasError: !!fieldError });
         }}
         rules={rules}
         name={name}

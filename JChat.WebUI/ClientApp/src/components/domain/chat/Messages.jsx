@@ -14,7 +14,7 @@ const Messages = ({ messages, ...props }) => {
       {...props}
     >
       {messages.map((m) => (
-        <Message>{m}</Message>
+        <Message key={m.id}>{m.body}</Message>
       ))}
     </div>
   );

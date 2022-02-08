@@ -1,31 +1,33 @@
 import React from 'react';
 
+import { setConfig } from 'react-hot-loader';
 import { hot } from 'react-hot-loader/root';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
+import SignalRHub from '@/components/domain/SignalRHub';
 import WorkspaceSelector from '@/components/domain/workspace/WorkspaceSelector';
 import { useAuth } from '@/providers/authContext';
 import { isWorkspaceSelectedSelector } from '@/store/workspace/workspace.selectors';
 
+setConfig({ logLevel: 'debug' });
+
 const AuthenticatedApp = React.lazy(() => import('./AuthenticatedApp'));
 const UnauthenticatedApp = React.lazy(() => import('./UnauthenticatedApp'));
 
-const App = ({ isWorkspaceSelected }) => {
+const App = () => {
+  const isWorkspaceSelected = useSelector(isWorkspaceSelectedSelector);
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return <UnauthenticatedApp />;
   }
 
-  if (!isWorkspaceSelected) {
-    return <WorkspaceSelector />;
-  }
-
-  return <AuthenticatedApp />;
+  return (
+    <>
+      <SignalRHub />
+      {isWorkspaceSelected ? <AuthenticatedApp /> : <WorkspaceSelector />}
+    </>
+  );
 };
 
-const mapState = (state) => ({
-  isWorkspaceSelected: isWorkspaceSelectedSelector(state),
-});
-
-export default connect(mapState)(hot(App));
+export default hot(App);

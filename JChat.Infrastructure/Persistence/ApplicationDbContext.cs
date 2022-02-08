@@ -2,15 +2,14 @@ using System.Reflection;
 using JChat.Application.Shared.Interfaces;
 using JChat.Domain.Entities.Channel;
 using JChat.Domain.Entities.Message;
+using JChat.Domain.Entities.Notifications;
 using JChat.Domain.Entities.User;
 using JChat.Domain.Entities.Workspace;
-using JChat.Domain.Interfaces;
 using JChat.Domain.SeedWork;
 using JChat.Infrastructure.Exceptions;
 using JChat.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using IDomainEvent = JChat.Domain.Interfaces.IDomainEvent;
 
 namespace JChat.Infrastructure.Persistence;
 
@@ -33,6 +32,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<UserWorkspace> UserWorkspaces => Set<UserWorkspace>();
     public DbSet<Channel> Channels => Set<Channel>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     private ApplicationDbContext()
     {
@@ -91,20 +91,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             }
         }
 
-        var events = ChangeTracker.Entries<IAggregateRoot>()
-            .Select(x => x.Entity.GetUncommittedEvents())
-            .SelectMany(x => x)
-            .Where(domainEvent => !domainEvent.IsPublished)
-            .ToArray();
-
         try
         {
-            var result = await base.SaveChangesAsync(cancellationToken);
-            await DispatchEvents(events);
-
-            return result;
+            return await base.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" } postgresException)
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException
+                                           {
+                                               SqlState: "23505"
+                                           } postgresException)
         {
             throw new ViolatesUniqueKeyConstraintException(
                 postgresException.ConstraintName,
@@ -119,18 +113,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
         builder.ApplyAuditableEntityConfiguration();
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
         var seeder = new ApplicationDbContextSeeder(builder);
         seeder.Seed();
 
         base.OnModelCreating(builder);
-    }
-
-    private async Task DispatchEvents(IEnumerable<IDomainEvent> events)
-    {
-        foreach (var @event in events)
-        {
-            @event.IsPublished = true;
-            await _domainEventService.Publish(@event);
-        }
     }
 }

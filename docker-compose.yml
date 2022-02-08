@@ -115,6 +115,8 @@ services:
       - postgres:postgresd
     environment:
       DSN: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$ORY_KETO_DATABASE?sslmode=disable&max_conns=20&max_idle_conns=4
+      LOG_LEVEL: debug
+      LOG_LEAK_SENSITIVE_VALUES: true
     ports:
       - 4466:4466
       - 4467:4467

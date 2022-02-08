@@ -351,12 +351,12 @@
         }
       }
     },
-    "/users": {
+    "/notifications": {
       "get": {
         "tags": [
-          "Users"
+          "Notifications"
         ],
-        "operationId": "Users_List",
+        "operationId": "Notifications_List",
         "parameters": [
           {
             "name": "User.Id",
@@ -395,22 +395,13 @@
             "x-position": 4
           },
           {
-            "name": "WorkspaceId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 5
-          },
-          {
             "name": "PageNumber",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 6
+            "x-position": 5
           },
           {
             "name": "PageSize",
@@ -419,7 +410,100 @@
               "type": "integer",
               "format": "int32"
             },
+            "x-position": 6
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfNotificationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/search": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_Query",
+        "parameters": [
+          {
+            "name": "Q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "WorkspaceScoped",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "User.Id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 3
+          },
+          {
+            "name": "User.Username",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 4
+          },
+          {
+            "name": "User.Firstname",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 5
+          },
+          {
+            "name": "User.Lastname",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 6
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
             "x-position": 7
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 8
           }
         ],
         "responses": {
@@ -662,11 +746,24 @@
               "$ref": "#/components/schemas/IdNameDto"
             }
           },
-          "permissions": {
+          "channels": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/KetoInternalRelationTuple"
+              "$ref": "#/components/schemas/ChannelBriefDto"
             }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserBriefDto"
+            }
+          },
+          "me": {
+            "$ref": "#/components/schemas/UserBriefDto"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {}
           }
         }
       },
@@ -683,78 +780,6 @@
           }
         }
       },
-      "KetoInternalRelationTuple": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "required": [
-          "namespace",
-          "object",
-          "relation"
-        ],
-        "properties": {
-          "namespace": {
-            "type": "string",
-            "nullable": true
-          },
-          "object": {
-            "type": "string",
-            "nullable": true
-          },
-          "relation": {
-            "type": "string",
-            "nullable": true
-          },
-          "subjectId": {
-            "type": "string",
-            "nullable": true
-          },
-          "subjectSet": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/KetoSubjectSet"
-              }
-            ]
-          },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true,
-            "additionalProperties": {}
-          }
-        }
-      },
-      "KetoSubjectSet": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "required": [
-          "namespace",
-          "object",
-          "relation"
-        ],
-        "properties": {
-          "namespace": {
-            "type": "string",
-            "nullable": true
-          },
-          "object": {
-            "type": "string",
-            "nullable": true
-          },
-          "relation": {
-            "type": "string",
-            "nullable": true
-          },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true,
-            "additionalProperties": {}
-          }
-        }
-      },
       "ChannelBriefDto": {
         "type": "object",
         "additionalProperties": false,
@@ -762,6 +787,22 @@
           "id": {
             "type": "string",
             "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "UserBriefDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "username": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -879,18 +920,12 @@
           "messages": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Message"
-            }
-          },
-          "messageRecipients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MessageRecipient"
+              "$ref": "#/components/schemas/MessageProjection"
             }
           }
         }
       },
-      "UserBriefDto": {
+      "MessageProjection": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -898,78 +933,112 @@
             "type": "string",
             "format": "guid"
           },
-          "username": {
+          "channelId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "recipientId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "messageId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "priorityId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "replyingToId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "forwardedById": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "senderId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "senderName": {
             "type": "string"
           },
-          "name": {
+          "isInbound": {
+            "type": "boolean"
+          },
+          "body": {
             "type": "string"
+          },
+          "meta": {
+            "type": "string"
+          },
+          "bodyTypeId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/MessagePriority"
+          },
+          "reactions": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "confirmedVisualizationAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "channel": {
+            "$ref": "#/components/schemas/Channel"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/User"
+          },
+          "recipient": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "replyingTo": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              }
+            ]
+          },
+          "forwardedBy": {
+            "$ref": "#/components/schemas/User"
+          },
+          "bodyType": {
+            "$ref": "#/components/schemas/MessageBodyType"
           }
         }
       },
-      "Message": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "messageTypeId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "messagePriorityId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "replyingToId": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "body": {
-                "type": "string"
-              },
-              "meta": {
-                "type": "string"
-              },
-              "expirationDate": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "replyingTo": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/Message"
-                  }
-                ]
-              },
-              "messageBodyType": {
-                "$ref": "#/components/schemas/MessageBodyType"
-              },
-              "messagePriority": {
-                "$ref": "#/components/schemas/MessagePriority"
-              },
-              "reactions": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MessageReaction"
-                }
-              },
-              "recipients": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MessageRecipient"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "MessageBodyType": {
+      "MessagePriority": {
         "allOf": [
           {
             "$ref": "#/components/schemas/Entity"
@@ -980,30 +1049,9 @@
             "properties": {
               "name": {
                 "type": "string"
-              },
-              "bodyType": {
-                "$ref": "#/components/schemas/MessageBody"
               }
             }
           }
-        ]
-      },
-      "MessageBody": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Text",
-          "Audio",
-          "Image",
-          "Video",
-          "Gif"
-        ],
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
         ]
       },
       "Entity": {
@@ -1030,207 +1078,6 @@
             "nullable": true
           }
         }
-      },
-      "MessagePriority": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "priority": {
-                "$ref": "#/components/schemas/MessagePriorityType"
-              }
-            }
-          }
-        ]
-      },
-      "MessagePriorityType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Normal",
-          "Snooze",
-          "RequiresConfirmation",
-          "RequiresConfirmationAndSnooze"
-        ],
-        "enum": [
-          0,
-          50,
-          100,
-          128
-        ]
-      },
-      "MessageReaction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "messageId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "reactionId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "message": {
-                "$ref": "#/components/schemas/Message"
-              },
-              "reaction": {
-                "$ref": "#/components/schemas/Reaction"
-              }
-            }
-          }
-        ]
-      },
-      "Reaction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "icon": {
-                "type": "string"
-              },
-              "color": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "AuditableEntity": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "x-abstract": true,
-            "additionalProperties": false,
-            "properties": {
-              "createdById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "lastModifiedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "deletedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "createdBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              },
-              "lastModifiedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              },
-              "deletedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "User": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "username": {
-                "type": "string"
-              },
-              "firstname": {
-                "type": "string"
-              },
-              "lastname": {
-                "type": "string"
-              },
-              "channels": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ChannelUser"
-                }
-              },
-              "userWorkspaces": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/UserWorkspace"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "ChannelUser": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "channelId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "userId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "isAdmin": {
-                "type": "boolean"
-              },
-              "channel": {
-                "$ref": "#/components/schemas/Channel"
-              },
-              "user": {
-                "$ref": "#/components/schemas/User"
-              }
-            }
-          }
-        ]
       },
       "Channel": {
         "allOf": [
@@ -1344,6 +1191,255 @@
                     "$ref": "#/components/schemas/User"
                   }
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "User": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "username": {
+                "type": "string"
+              },
+              "firstname": {
+                "type": "string"
+              },
+              "lastname": {
+                "type": "string"
+              },
+              "channels": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChannelUser"
+                }
+              },
+              "userWorkspaces": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserWorkspace"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ChannelUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "channelId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "isAdmin": {
+                "type": "boolean"
+              },
+              "channel": {
+                "$ref": "#/components/schemas/Channel"
+              },
+              "user": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        ]
+      },
+      "AuditableEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "x-abstract": true,
+            "additionalProperties": false,
+            "properties": {
+              "createdById": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "lastModifiedById": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "deletedById": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "createdBy": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/User"
+                  }
+                ]
+              },
+              "lastModifiedBy": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/User"
+                  }
+                ]
+              },
+              "deletedBy": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/User"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Message": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "bodyTypeId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "priorityId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "replyingToId": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "messageBodyTypeId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "body": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "string"
+              },
+              "expirationDate": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "replyingTo": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                ]
+              },
+              "bodyType": {
+                "$ref": "#/components/schemas/MessageBodyType"
+              },
+              "priority": {
+                "$ref": "#/components/schemas/MessagePriority"
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageReaction"
+                }
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageRecipient"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "MessageBodyType": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MessageReaction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "messageId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "reactionId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "message": {
+                "$ref": "#/components/schemas/Message"
+              },
+              "reaction": {
+                "$ref": "#/components/schemas/Reaction"
+              }
+            }
+          }
+        ]
+      },
+      "Reaction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
               }
             }
           }
@@ -1624,6 +1720,80 @@
             "type": "string"
           }
         }
+      },
+      "PaginatedListOfNotificationDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotificationDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "workspaceId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "meta": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/NotificationType"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotificationType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "WorkspaceInvitation",
+          "UserJoinedWorkspace",
+          "UserJoinedChannel",
+          "NewMessage"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
       },
       "PaginatedListOfUserBriefDto": {
         "type": "object",

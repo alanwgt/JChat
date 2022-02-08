@@ -1,4 +1,3 @@
-using JChat.Domain.Enums;
 using JChat.Domain.SeedWork;
 
 namespace JChat.Domain.Entities.Message;
@@ -6,15 +5,14 @@ namespace JChat.Domain.Entities.Message;
 public class MessageBodyType : Entity
 {
     public string Name { get; protected set; }
-    public MessageBody BodyType { get; protected set; }
 
     protected MessageBodyType()
     {
     }
 
-    public MessageBodyType(string name, MessageBody bodyType)
+    public MessageBodyType(Guid id, string name)
     {
+        Id = id;
         Name = name;
-        BodyType = bodyType;
     }
 }

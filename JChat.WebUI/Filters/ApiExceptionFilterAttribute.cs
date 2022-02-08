@@ -28,7 +28,8 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             { typeof(ApplicationException), HandleApplicationException },
             { typeof(DomainException), HandleDomainException },
             { typeof(ViolatesUniqueKeyConstraintException), HandleUniqueKeyViolationException },
-            { typeof(InvalidOperationException), HandleInvalidOperationException }
+            { typeof(InvalidOperationException), HandleInvalidOperationException },
+            { typeof(BadRequestException), HandleBadRequestException }
         };
     }
 
@@ -200,6 +201,30 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
     private static void HandleDomainException(ExceptionContext context)
     {
         var exception = (DomainException)context.Exception;
+
+        var details = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "An error occurred while processing your request.",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+        };
+
+        if (exception.Details != null)
+        {
+            details.Detail = exception.Details;
+        }
+
+        context.Result = new ObjectResult(details)
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
+
+        context.ExceptionHandled = true;
+    }
+
+    private static void HandleBadRequestException(ExceptionContext context)
+    {
+        var exception = (BadRequestException)context.Exception;
 
         var details = new ProblemDetails
         {

@@ -1,6 +1,7 @@
 using System.Reflection;
 using JChat.Application.Shared.Behaviors;
 using FluentValidation;
+using JChat.Application.Notifications;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Services;
 using MediatR;
@@ -18,6 +19,7 @@ public static class DependencyInjection
         services.AddMediatR(Assembly.GetExecutingAssembly());
 
         services.AddScoped<ICurrentWorkspaceService, CurrentWorkspaceService>();
+        services.AddTransient<INotificationCenter, NotificationCenter>();
         services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));

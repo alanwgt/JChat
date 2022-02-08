@@ -1,5 +1,6 @@
 using JChat.Domain.Entities.Channel;
 using JChat.Domain.Entities.Message;
+using JChat.Domain.Entities.Notifications;
 using JChat.Domain.Entities.User;
 using JChat.Domain.Entities.Workspace;
 using Microsoft.EntityFrameworkCore;
@@ -23,5 +24,6 @@ public interface IApplicationDbContext
    DbSet<ChannelUser> ChannelUsers { get; }
    DbSet<UserWorkspace> UserWorkspaces { get; }
    DbSet<Channel> Channels { get; }
+   DbSet<Notification> Notifications { get; }
    DatabaseFacade Database { get; }
 }

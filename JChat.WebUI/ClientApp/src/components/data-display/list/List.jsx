@@ -7,14 +7,7 @@ const List = ({ items, render, ...props }) => {
     return <EmptyList />;
   }
 
-  return (
-    <ul {...props}>
-      {items.map((item) =>
-        // <ListItem key={item.id || item.key}>{render(item)}</ListItem>
-        render(item)
-      )}
-    </ul>
-  );
+  return <ul {...props}>{items.map((item) => render(item))}</ul>;
 };
 
 export default List;

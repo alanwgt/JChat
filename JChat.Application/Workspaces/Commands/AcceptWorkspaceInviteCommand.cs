@@ -3,6 +3,7 @@ using JChat.Application.Enums;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Workspaces.Queries;
+using JChat.Domain.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,13 +20,15 @@ public class
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorization;
+    private readonly IDomainEventService _eventService;
 
     public AcceptWorkspaceInvitationCommandHandler(IApplicationDbContext context, IMapper mapper,
-        IAuthorizationService authorization)
+        IAuthorizationService authorization, IDomainEventService eventService)
     {
         _context = context;
         _mapper = mapper;
         _authorization = authorization;
+        _eventService = eventService;
     }
 
     public async Task<WorkspaceBriefDto> Handle(AcceptWorkspaceInviteCommand request,
@@ -49,6 +52,7 @@ public class
 
         // TODO: send notification
         await _context.SaveChangesAsync(cancellationToken);
+        await _eventService.Publish(new UserJoinedWorkspaceEvent(request.User.Id, userWorkspace.WorkspaceId));
 
         return _mapper.Map<WorkspaceBriefDto>(userWorkspace.Workspace);
     }

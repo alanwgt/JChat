@@ -18,7 +18,7 @@ const plugins = [
 const resolvePath = (...parts) => path.resolve(__dirname, ...parts);
 
 const config = {
-  entry: './index.jsx',
+  entry: ['react-hot-loader/patch', './index.jsx'],
   output: {
     path: resolvePath('build'),
     filename: 'bundle.js',
@@ -58,7 +58,8 @@ if (devMode) {
   plugins.push(
     new webpack.SourceMapDevToolPlugin({
       filename: '[file].map',
-    })
+    }),
+    new webpack.HotModuleReplacementPlugin()
   );
   config.devtool = 'source-map';
   config.devServer = {

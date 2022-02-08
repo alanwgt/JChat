@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { styled } from 'baseui';
-import { Label4 } from 'baseui/typography';
+import {LabelXSmall } from 'baseui/typography';
 import Type from 'prop-types';
 
 import DotStatus from '@/components/domain/chat/DotStatus';
@@ -16,13 +16,7 @@ const AvatarStatusContainer = styled('div', {
   marginRight: '5px',
 });
 
-const Status = styled(DotStatus, {
-  position: 'absolute',
-  bottom: 0,
-  right: 0,
-});
-
-const StyledLabel4 = styled(Label4, {
+const StyledLabel4 = styled(LabelXSmall, {
   display: 'flex',
   alignItems: 'center',
 });
@@ -31,7 +25,14 @@ const UserStatus = ({ name, online, ...props }) => (
   <Container {...props}>
     <AvatarStatusContainer>
       <UserAvatar name={name} />
-      <Status $online={online} />
+      <DotStatus
+        $style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+        }}
+        $online={online}
+      />
     </AvatarStatusContainer>
     <StyledLabel4>{name}</StyledLabel4>
   </Container>

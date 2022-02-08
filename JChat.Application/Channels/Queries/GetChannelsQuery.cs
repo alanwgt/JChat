@@ -27,12 +27,16 @@ public class GetChannelsQueryHandler : IRequestHandler<GetChannelsQuery, Paginat
 
     public Task<PaginatedList<ChannelBriefDto>> Handle(GetChannelsQuery request, CancellationToken cancellationToken)
     {
-        // TODO: list only authorized channels! (from keto)
         var query = _context.Channels
-                .Where(c => c.WorkspaceId == request.WorkspaceId)
-                .Where(c => !c.IsPrivate)
-                .OrderBy(c => c.Name)
-                .AsNoTracking();
+            .Where(c => c.WorkspaceId == request.WorkspaceId)
+            .Where(c => c.IsPrivate == false)
+            .Join(
+                _context.ChannelUsers.Where(cu => cu.UserId == request.User.Id),
+                c => c.Id,
+                cu => cu.ChannelId,
+                (c, cu) => c
+            ).OrderBy(c => c.Name)
+            .AsNoTracking();
 
         return query.PaginatedListAsync(request, _mapper.ConfigurationProvider);
     }

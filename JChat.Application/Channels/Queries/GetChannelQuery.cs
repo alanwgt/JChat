@@ -38,31 +38,29 @@ public class GetChannelQueryHandler : IRequestHandler<GetChannelQuery, ChannelDe
         var members = await _context.ChannelUsers
             .Where(cu => cu.UserId != request.User.Id)
             .Where(cu => cu.ChannelId == channel.Id)
-            .Select(cu => cu.User)
+            .Join(
+                _context.Users,
+                cu => cu.UserId,
+                u => u.Id,
+                (cu, u) => u
+            )
             .ProjectTo<UserBriefDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
-        var messages = await _context.Messages
+        var messages = await _context.MessageProjections
             .OrderByDescending(m => m.CreatedAt)
-            .Join(
-                _context.MessageRecipients.Where(mr => mr.RecipientId == request.User.Id),
-                m => m.Id,
-                mr => mr.MessageId,
-                (m, mr) => new { Message = m, MessageRecipient = mr }
-            )
-            /*.LeftJoin(
-                _context.MessageReactions,
-                g => g.Message.Id,
-                mReaction => mReaction.MessageId,
-                (g, mReaction) => new { g.Message, g.MessageRecipient, MessageReaction = mReaction}
-            )*/.ToListAsync(cancellationToken);
+            .Where(mp => mp.ChannelId == request.ChannelId)
+            .Where(mp =>
+                mp.RecipientId == null || mp.RecipientId == request.User.Id ||
+                mp.IsInbound == false && mp.SenderId == request.User.Id)
+            .ToListAsync(cancellationToken);
 
         return new ChannelDetailedDto
         {
             Channel = channel,
             Members = members,
-            Messages = messages.Select(m => m.Message),
-            MessageRecipients = messages.Select(m => m.MessageRecipient)
+            Messages = messages,
+            // MessageRecipients = messages.Select(m => m.MessageRecipient)
         };
     }
 }

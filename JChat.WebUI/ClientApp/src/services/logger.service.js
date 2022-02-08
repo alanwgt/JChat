@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+
 import inspect from '@/utils/inspect.utils';
 
 export const LogLevel = Object.freeze({

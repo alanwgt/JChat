@@ -22,6 +22,7 @@ const CreateChannelModal = ({ onCreate, ...props }) => {
       title={t('channels.modal.create.title')}
       {...props}
       onPositive={handleSubmit(onSubmit)}
+      unstable_ModalBackdropScroll
     >
       <form>
         <FormInput

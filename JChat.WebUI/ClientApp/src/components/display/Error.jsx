@@ -7,7 +7,7 @@ const Error = ({ err }) => {
   const [t] = useTranslation();
   const isResponse = !!err.response;
 
-  const defaultTitle = t('error.unknown');
+  const defaultTitle = t('exception.unknown');
   const defaultBody = err.message;
 
   const title = isResponse

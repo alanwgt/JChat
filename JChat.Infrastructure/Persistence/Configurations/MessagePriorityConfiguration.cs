@@ -8,7 +8,5 @@ public class MessagePriorityConfiguration : IEntityTypeConfiguration<MessagePrio
 {
     public void Configure(EntityTypeBuilder<MessagePriority> builder)
     {
-        builder.Property(mp => mp.Priority)
-            .HasColumnType("smallint");
     }
 }

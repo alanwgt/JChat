@@ -1,17 +1,19 @@
 import React from 'react';
 
 import { styled, useStyletron } from 'baseui';
+import { Button, SIZE as ButtonSize, KIND } from 'baseui/button';
 import { Input, SIZE } from 'baseui/input';
 import { useTranslation } from 'react-i18next';
+import { connect } from 'react-redux';
 
 import UserMenu from '@/components/auth/UserMenu';
 import UserSettingsModal from '@/components/auth/UserSettingsModal';
-import Logo from '@/components/typography/icons/Logo';
-import { Button, KIND, SIZE as ButtonSize } from 'baseui/button';
+import NotificationsModal from '@/components/domain/notifications/NotificationsModal';
+import NotificationsToggle from '@/components/domain/notifications/NotificationsToggle';
 import Icon from '@/components/typography/Icon';
-import { connect } from 'react-redux';
-import { isStarredMessagesBarOpenSelector } from '@/store/ui/ui.selectors';
+import Logo from '@/components/typography/icons/Logo';
 import { toggleStarredMessagesBar } from '@/store/ui/ui.actions';
+import { isStarredMessagesBarOpenSelector } from '@/store/ui/ui.selectors';
 
 const Container = styled('div', ({ $theme }) => ({
   display: 'flex',
@@ -29,6 +31,7 @@ const Header = ({ isStarredMessagesBarOpen, toggleStarredMessagesBar }) => {
 
   return (
     <>
+      <NotificationsModal />
       <UserSettingsModal />
       <Container>
         <div
@@ -49,14 +52,13 @@ const Header = ({ isStarredMessagesBarOpen, toggleStarredMessagesBar }) => {
           />
         </div>
         <div>
+          <NotificationsToggle />
           <Button
             kind={KIND.tertiary}
             size={ButtonSize.compact}
             onClick={() => toggleStarredMessagesBar()}
           >
-            <Icon
-              name={isStarredMessagesBarOpen ? 'star-filled' : 'star-empty'}
-            />
+            <Icon name={isStarredMessagesBarOpen ? 'star-filled' : 'star'} />
           </Button>
           <UserMenu />
         </div>

@@ -9,14 +9,13 @@ import { expandStyleIf } from '@/utils/styletron.utils';
 
 const DM = styled('div', ({ $isActive, $theme }) => ({
   display: 'flex',
-  paddingLeft: '5px',
+  padding: '5px 0 5px 5px',
   ':not(:last-of-type)': {
     marginBottom: '5px',
   },
   ...$theme.textBreak,
   ...$theme.clickable,
   ...expandStyleIf($isActive, {
-    outline: `1px dashed ${$theme.colors.themePrimary}`,
     backgroundColor: `${$theme.colors.themePrimary}4D`,
   }),
 }));

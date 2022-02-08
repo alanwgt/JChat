@@ -8,7 +8,5 @@ public class MessageBodyTypeConfiguration : IEntityTypeConfiguration<MessageBody
 {
     public void Configure(EntityTypeBuilder<MessageBodyType> builder)
     {
-        builder.Property(mbt => mbt.BodyType)
-            .HasColumnType("smallint");
     }
 }

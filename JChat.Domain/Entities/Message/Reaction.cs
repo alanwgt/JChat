@@ -14,8 +14,9 @@ public class Reaction : Entity
     {
     }
 
-    public Reaction(string name, string icon, string color)
+    public Reaction(Guid id, string name, string icon, string color)
     {
+        Id = id;
         Name = name;
         Icon = icon;
         Color = color;

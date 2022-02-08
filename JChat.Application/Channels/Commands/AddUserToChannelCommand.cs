@@ -6,6 +6,7 @@ using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Security;
+using JChat.Domain.Events;
 using MediatR;
 
 namespace JChat.Application.Channels.Commands;
@@ -33,14 +34,16 @@ public class AddUserToChannelCommandHandler : IRequestHandler<AddUserToChannelCo
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorization;
+    private readonly IDomainEventService _eventService;
     private readonly IMapper _mapper;
 
     public AddUserToChannelCommandHandler(IApplicationDbContext context, IMapper mapper,
-        IAuthorizationService authorization)
+        IAuthorizationService authorization, IDomainEventService eventService)
     {
         _context = context;
         _mapper = mapper;
         _authorization = authorization;
+        _eventService = eventService;
     }
 
     public async Task<ChannelUserBriefDto> Handle(AddUserToChannelCommand request, CancellationToken cancellationToken)
@@ -59,6 +62,7 @@ public class AddUserToChannelCommandHandler : IRequestHandler<AddUserToChannelCo
         );
 
         await _context.SaveChangesAsync(cancellationToken);
+        await _eventService.Publish(new UserAddedToChannel(request.ChannelId, request.User.Id, request.UserId));
         return _mapper.Map<ChannelUserBriefDto>(channelUser);
     }
 }

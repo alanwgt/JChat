@@ -1,10 +1,12 @@
 import React from 'react';
+
 import { Pagination, SIZE } from 'baseui/pagination';
+
 import remoteDataHoc from '@/hocs/remoteDataHoc';
 
 const paginatedRemoteDataHoc =
   (WrappedComponent) =>
-  ({ request, params = {}, dataKey = 'data', render = null }) => {
+  ({ request, params = {}, dataKey = 'data', render = null, ...props }) => {
     const [numPages, setNumPages] = React.useState(1);
     const [currPage, setCurrPage] = React.useState(1);
 
@@ -37,6 +39,7 @@ const paginatedRemoteDataHoc =
 
             return <WrappedComponent {...{ [dataKey]: data.items }} />;
           }}
+          {...props}
         />
         {numPages > 1 && (
           <Pagination

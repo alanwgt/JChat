@@ -22,6 +22,7 @@ const Modal = ({
   closeable = true,
   negativeText = null,
   positiveText = null,
+  ...props
 }) => {
   const [t] = useTranslation();
 
@@ -34,6 +35,7 @@ const Modal = ({
       autoFocus
       size={SIZE.auto}
       role={ROLE.dialog}
+      {...props}
     >
       {title && <ModalHeader>{title}</ModalHeader>}
       <ModalBody>{children}</ModalBody>

@@ -20,6 +20,7 @@
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" />
       <PackageReference Include="Ory.Keto.Client" Version="0.7.0-alpha.1" />
     </ItemGroup>
 

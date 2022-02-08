@@ -26,7 +26,9 @@ public class GetWorkspacesQueryHandler : IRequestHandler<GetWorkspacesQuery, Pag
     {
         var query = _context.Workspaces
             .Join(
-                _context.UserWorkspaces,
+                _context.UserWorkspaces
+                    .Where(uw => uw.UserId == _currentUser.User.Id)
+                    .Where(uw => uw.Admin || uw.AcceptedAt != null),
                 w => w.Id,
                 uw => uw.WorkspaceId,
                 (w, uw) => new
@@ -39,8 +41,7 @@ public class GetWorkspacesQueryHandler : IRequestHandler<GetWorkspacesQuery, Pag
                     },
                     uw.UserId
                 }
-            ).Where(g => g.UserId == _currentUser.User.Id)
-            .Select(g => g.Dto);
+            ).Select(g => g.Dto);
 
         return await PaginatedList<WorkspaceBriefDto>.CreateAsync(
             query.AsNoTracking(),

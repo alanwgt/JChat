@@ -15,6 +15,10 @@ export const Hook = new ApiDeclaration.HookClient(
   'http://api.jchat.alanwgt.com',
   axios
 );
+export const Notifications = new ApiDeclaration.NotificationsClient(
+  'http://api.jchat.alanwgt.com',
+  axios
+);
 export const Users = new ApiDeclaration.UsersClient(
   'http://api.jchat.alanwgt.com',
   axios

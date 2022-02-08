@@ -2,7 +2,12 @@ import React from 'react';
 
 import { ListItem as BaseListItem, ListItemLabel } from 'baseui/list';
 
-const ListItem = ({ children, description = null, onClick = null }) => {
+const ListItem = ({
+  children,
+  description = null,
+  onClick = null,
+  ...props
+}) => {
   let style = null;
 
   if (onClick) {
@@ -26,6 +31,7 @@ const ListItem = ({ children, description = null, onClick = null }) => {
             style,
           },
         }}
+        {...props}
       >
         <ListItemLabel description={description}>{children}</ListItemLabel>
       </BaseListItem>

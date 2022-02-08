@@ -8,7 +8,10 @@ namespace JChat.WebUI.Controllers;
 
 public class UsersController : ApiController
 {
-    [HttpGet]
-    public async Task<ActionResult<PaginatedList<UserBriefDto>>> List([FromQuery] GetUsersQuery query)
+    // [HttpGet]
+    // public async Task<ActionResult<PaginatedList<UserBriefDto>>> FromWorkspace([FromQuery] GetWorkspaceUsersQuery query)
+    //     => Ok(await Mediator.Send(query));
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginatedList<UserBriefDto>>> Query([FromQuery] GetUsersQuery query)
         => Ok(await Mediator.Send(query));
 }

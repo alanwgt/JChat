@@ -1,9 +1,10 @@
 import React from 'react';
-import _ from 'lodash';
+
+import { useStyletron } from 'baseui';
 import { StyledSpinnerNext } from 'baseui/spinner';
+import _ from 'lodash';
 
 import Error from '@/components/display/Error';
-import { useStyletron } from 'baseui';
 
 const remoteDataHoc =
   (WrappedComponent) =>
@@ -12,6 +13,7 @@ const remoteDataHoc =
     params = {},
     dataKey = 'data',
     render = null,
+    onResolve = null,
     ...extraProps
   }) => {
     const [css] = useStyletron();
@@ -25,7 +27,12 @@ const remoteDataHoc =
       }
 
       setLastRequestParams(params);
-      Promise.resolve(request(params)).then(setData).catch(setError);
+      Promise.resolve(request(params))
+        .then((responseData) => {
+          setData(responseData);
+          onResolve?.(responseData);
+        })
+        .catch(setError);
     }, [params]);
 
     if (error) {

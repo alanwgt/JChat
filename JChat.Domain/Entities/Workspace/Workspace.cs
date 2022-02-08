@@ -9,8 +9,8 @@ public class Workspace : AuditableEntity
 {
     public string Name { get; private set; }
 
-    public ICollection<UserWorkspace> UserWorkspaces { get; } = new List<UserWorkspace>();
-    public ICollection<Channel.Channel> Channels { get; } = new List<Channel.Channel>();
+    public IList<UserWorkspace> UserWorkspaces { get; protected set; } = new List<UserWorkspace>();
+    public IList<Channel.Channel> Channels { get; protected set; } = new List<Channel.Channel>();
 
     protected Workspace()
     {

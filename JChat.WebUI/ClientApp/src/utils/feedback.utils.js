@@ -1,4 +1,5 @@
 import { PLACEMENT, toaster } from 'baseui/toast';
+import i18n from '@/i18n';
 
 const toastConfig = {
   autoHideDuration: 3000,
@@ -30,7 +31,11 @@ export default {
     let message = children;
 
     if (children instanceof Error) {
-      message = children.message;
+      if (children.i18nKey) {
+        message = i18n.t(children.i18nKey);
+      } else {
+        message = children.message;
+      }
     }
 
     toaster.negative(message, {

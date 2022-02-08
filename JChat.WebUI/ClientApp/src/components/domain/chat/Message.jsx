@@ -43,7 +43,7 @@ const Message = ({ children, incoming, reaction, ...props }) => (
 );
 
 Message.propTypes = {
-  children: Type.element.isRequired,
+  children: Type.oneOfType([Type.string, Type.object]).isRequired,
   reaction: Type.element,
   incoming: Type.bool,
 };

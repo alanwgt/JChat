@@ -11,6 +11,9 @@ public class MessageProjectionConfiguration : IEntityTypeConfiguration<MessagePr
         builder.Property(mp => mp.Reactions)
             .HasColumnType("jsonb");
 
+        builder
+            .HasOne(uw => uw.Sender);
+
         builder.HasIndex(mp => new { mp.ChannelId, mp.RecipientId });
     }
 }

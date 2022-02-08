@@ -6,6 +6,7 @@ using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Security;
 using JChat.Domain.Entities.Message;
+using JChat.Domain.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationException;
@@ -18,7 +19,7 @@ public class CreateMessageCommand : ChannelScopedRequest<MessageBriefDto>
     public string Body { get; set; }
     public Guid BodyType { get; set; }
     public Guid Priority { get; set; }
-    public DateTime? ExpirationDate { get; set; }
+    public DateTime? ExpirationDate { get; set; } = null;
 }
 
 public class CreateMessageCommandValidator : AbstractValidator<CreateMessageCommand>
@@ -38,11 +39,13 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IDomainEventService _eventService;
 
-    public CreateMessageCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public CreateMessageCommandHandler(IApplicationDbContext context, IMapper mapper, IDomainEventService eventService)
     {
         _context = context;
         _mapper = mapper;
+        _eventService = eventService;
     }
 
     public async Task<MessageBriefDto> Handle(CreateMessageCommand request, CancellationToken cancellationToken)
@@ -56,12 +59,12 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
                 .ToListAsync(cancellationToken);
 
             var messageBodyType = await _context.MessageBodyTypes
-                .FindAsync(new object?[] { request.BodyType }, cancellationToken)
-                    ?? throw new NotFoundException("message body type", request.BodyType);
+                                      .FindAsync(new object?[] { request.BodyType }, cancellationToken)
+                                  ?? throw new NotFoundException("message body type", request.BodyType);
 
             if (!recipients.Any())
             {
-                throw new ApplicationException{ Details = "there is no user in the given channel" };
+                throw new ApplicationException { Details = "there is no user in the given channel" };
             }
 
             var message = new Message(
@@ -83,17 +86,20 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
                     MessageId = message.Id,
                     Body = message.Body,
                     Meta = message.Meta,
-                    Priority = message.MessagePriority,
-                    Reactions = "[]",
-                    BodyType = messageBodyType.BodyType,
-                    RecipientId = recipient.Id,
-                },cancellationToken);
+                    PriorityId = message.PriorityId,
+                    Reactions = "{}",
+                    BodyTypeId = messageBodyType.Id,
+                    RecipientId = recipient.UserId,
+                    IsInbound = recipient.UserId != request.User.Id,
+                    SenderId = request.User.Id,
+                    SenderName = request.User.Username,
+                }, cancellationToken);
             }
 
-
             await _context.SaveChangesAsync(cancellationToken);
+            await _eventService.Publish(new MessageCreatedEvent(request.ChannelId, message.Id,
+                recipients.Select(cu => cu.UserId)));
 
-            // TODO: notification
             // TODO: queue expiration date
             await transaction.CommitAsync(cancellationToken);
             return _mapper.Map<MessageBriefDto>(message);

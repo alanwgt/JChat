@@ -2,7 +2,7 @@ using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Security;
-using JChat.Domain.Entities.User;
+using JChat.Domain.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationException;
@@ -18,10 +18,12 @@ public class InviteToWorkspaceCommand : WorkspaceScopedRequest<Unit>
 public class InviteToWorkspaceCommandHandler : IRequestHandler<InviteToWorkspaceCommand, Unit>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IDomainEventService _eventService;
 
-    public InviteToWorkspaceCommandHandler(IApplicationDbContext context)
+    public InviteToWorkspaceCommandHandler(IApplicationDbContext context, IDomainEventService eventService)
     {
         _context = context;
+        _eventService = eventService;
     }
 
     public async Task<Unit> Handle(InviteToWorkspaceCommand request, CancellationToken cancellationToken)
@@ -45,9 +47,13 @@ public class InviteToWorkspaceCommandHandler : IRequestHandler<InviteToWorkspace
                         throw new NotFoundException("workspace", request.WorkspaceId);
 
         var invite = workspace.AddMember(request.UserId);
-        invite.AcceptInvitation();
-
         await _context.SaveChangesAsync(cancellationToken);
+        await _eventService.Publish(new UserInvitedToWorkspaceEvent(
+            workspace.Id,
+            request.User.Id,
+            request.UserId,
+            invite.Id
+        ));
 
         return Unit.Value;
     }

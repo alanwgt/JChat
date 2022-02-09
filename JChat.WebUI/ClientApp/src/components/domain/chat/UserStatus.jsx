@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { styled } from 'baseui';
-import {LabelXSmall } from 'baseui/typography';
+import { LabelXSmall } from 'baseui/typography';
 import Type from 'prop-types';
 
 import DotStatus from '@/components/domain/chat/DotStatus';

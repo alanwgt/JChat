@@ -61,7 +61,7 @@ const ChatInfo = ({ name, channelId, ...props }) => {
           setIsOpen={setFinderIsOpen}
         />
       )}
-      {menuActions.length && (
+      {!!menuActions.length && (
         <StatefulPopover
           autoFocus={false}
           dismissOnEsc

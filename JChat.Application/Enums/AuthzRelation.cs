@@ -2,11 +2,11 @@ namespace JChat.Application.Enums;
 
 public enum AuthzRelation
 {
-    Ownership = 10,
-    Manage = 20,
-    Member = 30,
-    Write = 40,
-    Read = 50,
+    Ownership = 1000,
+    Manage = 800,
+    Member = 600,
+    Write = 400,
+    Read = 200,
 }
 
 public static class AuthzRelationExtensions

@@ -32,15 +32,17 @@ public class UserAddedToChannelEventHandler : INotificationHandler<DomainEventNo
         CancellationToken cancellationToken)
     {
         var (channelId, addedById, userId) = notification.DomainEvent;
+        var user = await _context.Users.FindAsync_(userId, cancellationToken);
         var channel = await _context.Channels.FindAsync_(channelId, cancellationToken);
         var addedBy = await _context.Users.FindAsync_(addedById, cancellationToken);
         var notificationEntity = new Notification(addedById, userId, NotificationType.UserJoinedChannel,
-           _mapper.Map<ChannelBriefDto>(channel));
+            _mapper.Map<ChannelBriefDto>(channel));
         var message = new Message(
             MessageBodyTypeId.ChannelEvent,
             MessagePriorityId.Normal,
-            "user.joined",
-            JsonSerializer.Serialize(new { addedById, channelId, userId })
+            "channels.user.joined",
+            JsonSerializer.Serialize(new
+                { addedById, userId, addedBy = addedBy.Username, username = user.Username })
         );
         var messageProjection = MessageProjection.From(message, channelId, addedBy!);
 

@@ -1,3 +1,4 @@
+using JChat.Application.Messages.Queries;
 using JChat.Application.Notifications.Queries;
 using JChat.Application.Shared.Interfaces;
 using Microsoft.AspNetCore.SignalR;
@@ -29,4 +30,10 @@ public class NotificationCenter : INotificationCenter
 
     public Task SendWorkspaceNotification(Guid workspaceId, NotificationDto notification)
         => _hub.Clients.Group(workspaceId.ToString()).NewNotification(notification);
+
+    public Task NewMessage(Guid userId, MessageProjectionDto message)
+        => ExecuteIfUserIsOnline(userId, hub => hub.NewMessage(message));
+
+    public Task ChannelDeleted(Guid userId, Guid channelId, string channelName)
+        => ExecuteIfUserIsOnline(userId, hub => hub.ChannelDeleted(channelId, channelName));
 }

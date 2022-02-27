@@ -52,7 +52,10 @@ public class ChatHub : Hub<IClientHub>
         var (connectionId, _, groups) = OnlineUserManager.GetData(_currentUserService.User.Id);
 
         foreach (var group in groups)
+        {
             await Groups.RemoveFromGroupAsync(connectionId, group);
+            await Clients.OthersInGroup(group).UserDisconnected(_currentUserService.User.Id);
+        }
 
         OnlineUserManager.RemoveUser(_currentUserService.User.Id);
     }
@@ -75,6 +78,8 @@ public class ChatHub : Hub<IClientHub>
         OnlineUserManager.AddGroupToUser(userId, workspaceId);
         await Groups.AddToGroupAsync(Context.ConnectionId, workspaceId);
         await Clients.Caller.ConnectedToWorkspace(Guid.Parse(workspaceId));
+        await Clients.Caller.SetOnlineUsers(OnlineUserManager.GetOnlineUsers(workspaceId));
+        await Clients.OthersInGroup(workspaceId).UserConnected(userId);
     }
 
     public async Task DisconnectFromWorkspace(string workspaceId)
@@ -85,6 +90,7 @@ public class ChatHub : Hub<IClientHub>
         OnlineUserManager.RemoveGroupFromUser(_currentUserService.User.Id, workspaceId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, workspaceId);
         await Clients.Caller.DisconnectedFromWorkspace(Guid.Parse(workspaceId));
+        await Clients.OthersInGroup(workspaceId).UserDisconnected(_currentUserService.User.Id);
     }
 
     public Task ExecuteIfOnline(Guid userId, Func<IClientHub, Task> fn)

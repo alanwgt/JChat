@@ -8,7 +8,13 @@ import {
 import { NotificationType } from '@/api/web-api-client';
 import i18n from '@/i18n';
 import Console from '@/services/logger.service';
-import { addChannel } from '@/store/boot/boot.actions';
+import {
+  addChannelMessage,
+  addChatChannel,
+  removeChatChannel,
+  setOnlineUsers,
+  setUserStatus,
+} from '@/store/chat/chat.actions';
 import { addNotification } from '@/store/ui/ui.actions';
 import feedbackUtils from '@/utils/feedback.utils';
 
@@ -55,7 +61,12 @@ export const startConnection = (store) => {
       Console.info('received pong');
     });
     connection.on('NewNotification', (notification) => {
-      const meta = JSON.parse(notification.meta);
+      const meta = {};
+      const parsedJson = JSON.parse(notification.meta);
+      Object.entries(parsedJson).forEach(([k, v]) => {
+        meta[k.charAt(0).toLowerCase() + k.slice(1)] = v;
+      });
+
       Console.debug(`received notification ${JSON.stringify(notification)}`);
 
       switch (notification.type) {
@@ -68,21 +79,43 @@ export const startConnection = (store) => {
           );
           break;
         case NotificationType.UserJoinedChannel:
+          Console.debug`user added to channel ${meta}`;
           feedbackUtils.info(
             i18n.t('channels.added', { name: meta.channelName })
           );
-          store.dispatch(addChannel(meta));
+          store.dispatch(addChatChannel(meta));
           break;
         default:
       }
 
       store.dispatch(addNotification(notification));
     });
+    connection.on('NewMessage', (message) => {
+      Console.debug(`new message ${message}`);
+      store.dispatch(addChannelMessage(message.channelId, message));
+    });
     connection.on('ConnectedToWorkspace', (workspaceId) => {
       Console.debug(`connected to workspace ${workspaceId}`);
     });
     connection.on('DisconnectedFromWorkspace', (workspaceId) => {
       Console.debug(`disconnected from workspace ${workspaceId}`);
+    });
+    connection.on('SetOnlineUsers', (onlineUsers) => {
+      Console.debug`users currently online in workspace: ${onlineUsers}`;
+      store.dispatch(setOnlineUsers(onlineUsers));
+    });
+    connection.on('UserConnected', (userId) => {
+      Console.debug`user ${userId} connected into workspace`;
+      store.dispatch(setUserStatus(userId, true));
+    });
+    connection.on('UserDisconnected', (userId) => {
+      Console.debug`user ${userId} disconnected from workspace`;
+      store.dispatch(setUserStatus(userId, false));
+    });
+    connection.on('ChannelDeleted', (channelId, channelName) => {
+      Console.debug`channel ${channelName} deleted`;
+      feedbackUtils.info(i18n.t('channels.deleted', { channelName }));
+      store.dispatch(removeChatChannel(channelId));
     });
   });
   return connectionPromise;

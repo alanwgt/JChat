@@ -1,17 +1,36 @@
 import React from 'react';
 
+import { memoize, values } from 'lodash';
 import { useSelector } from 'react-redux';
 
-import { hasPermissionSelector } from '@/store/boot/boot.selectors';
+import { permissionsSelector } from '@/store/boot/boot.selectors';
+
+const PermissionWeight = {
+  ownership: 1000,
+  manage: 800,
+  member: 600,
+  write: 400,
+  read: 200,
+};
 
 const PermissionsContext = React.createContext({
   can: () => false,
 });
 
 export const PermissionsProvider = ({ children, ...props }) => {
-  const permissionChecker = useSelector(hasPermissionSelector);
+  const permissions = useSelector(permissionsSelector);
 
-  const can = (relation, ns, objId) => permissionChecker(relation, ns, objId);
+  const can = memoize(
+    (relation, ns, objId) =>
+      !!permissions.find(
+        (p) =>
+          p.namespace === ns &&
+          p.object === objId &&
+          PermissionWeight[relation.toLowerCase()] <= // what I'm asking for
+            PermissionWeight[p.relation] // what I have
+      ),
+    (...args) => values(args).join(':')
+  );
 
   return (
     <PermissionsContext.Provider value={can} {...props}>

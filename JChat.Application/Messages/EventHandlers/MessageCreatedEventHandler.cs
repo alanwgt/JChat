@@ -1,7 +1,8 @@
-using JChat.Application.Notifications.Queries;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using JChat.Application.Messages.Queries;
 using JChat.Application.Shared.Interfaces;
 using JChat.Application.Shared.Models;
-using JChat.Domain.Enums;
 using JChat.Domain.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,14 @@ public class MessageCreatedEventHandler : INotificationHandler<DomainEventNotifi
 {
     private readonly INotificationCenter _notificationCenter;
     private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
-    public MessageCreatedEventHandler(INotificationCenter notificationCenter, IApplicationDbContext context)
+    public MessageCreatedEventHandler(INotificationCenter notificationCenter, IApplicationDbContext context,
+        IMapper mapper)
     {
         _notificationCenter = notificationCenter;
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task Handle(DomainEventNotification<MessageCreatedEvent> notification,
@@ -27,18 +31,12 @@ public class MessageCreatedEventHandler : INotificationHandler<DomainEventNotifi
             .Include(mp => mp.Sender)
             .Where(mp => mp.ChannelId == channelId)
             .Where(mp => mp.MessageId == messageId)
+            .Where(mp => mp.RecipientId != mp.SenderId)
             .Where(mp => mp.RecipientId.HasValue && recipients.Contains(mp.RecipientId.Value))
+            .ProjectTo<MessageProjectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
-        foreach (var message in messages.Where(message => message.RecipientId.HasValue))
-        {
-            await _notificationCenter.SendUserNotification(message.RecipientId.Value, new NotificationDto
-            {
-                Id = Guid.NewGuid(),
-                Type = NotificationType.NewMessage,
-                CreatedBy = message.Sender.Username,
-                CreatedAt = message.CreatedAt
-            });
-        }
+        foreach (var message in messages)
+            await _notificationCenter.NewMessage(message.RecipientId, message);
     }
 }

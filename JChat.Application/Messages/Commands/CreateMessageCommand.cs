@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
-using JChat.Application.Channels.Queries;
+using JChat.Application.Messages.Queries;
+using JChat.Application.Shared.Constants;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Exceptions;
 using JChat.Application.Shared.Interfaces;
@@ -14,11 +15,12 @@ using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationExce
 namespace JChat.Application.Messages.Commands;
 
 [Authorize(Namespace = "channels", ObjectIdFromProperty = "ChannelId", Relation = "write")]
-public class CreateMessageCommand : ChannelScopedRequest<MessageBriefDto>
+public class CreateMessageCommand : ChannelScopedRequest<MessageProjectionDto>
 {
     public string Body { get; set; }
     public Guid BodyType { get; set; }
     public Guid Priority { get; set; }
+    public string Meta { get; set; } = "";
     public DateTime? ExpirationDate { get; set; } = null;
 }
 
@@ -26,8 +28,12 @@ public class CreateMessageCommandValidator : AbstractValidator<CreateMessageComm
 {
     public CreateMessageCommandValidator()
     {
+        RuleFor(c => c.Meta)
+            .NotEmpty()
+            .When(c => c.BodyType == MessageBodyTypeId.Gif);
         RuleFor(c => c.Body)
-            .NotEmpty();
+            .NotEmpty()
+            .When(c => c.BodyType == MessageBodyTypeId.Text);
         RuleFor(c => c.BodyType)
             .NotEmpty();
         RuleFor(c => c.Priority)
@@ -35,7 +41,7 @@ public class CreateMessageCommandValidator : AbstractValidator<CreateMessageComm
     }
 }
 
-public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, MessageBriefDto>
+public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, MessageProjectionDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -48,7 +54,7 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
         _eventService = eventService;
     }
 
-    public async Task<MessageBriefDto> Handle(CreateMessageCommand request, CancellationToken cancellationToken)
+    public async Task<MessageProjectionDto> Handle(CreateMessageCommand request, CancellationToken cancellationToken)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -71,29 +77,26 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
                 messageBodyType.Id,
                 request.Priority,
                 request.Body,
-                "",
+                request.Meta,
                 null,
                 request.ExpirationDate
             );
             _context.Messages.Add(message);
+            MessageProjectionDto senderMessageProjection = null;
 
             foreach (var recipient in recipients)
             {
                 message.AddRecipient(new MessageRecipient(recipient.UserId, message.Id, request.ChannelId));
-                await _context.MessageProjections.AddAsync(new MessageProjection
+                var mp = MessageProjection.From(message, request.ChannelId, request.User);
+                mp.RecipientId = recipient.UserId;
+                mp.IsInbound = recipient.UserId != request.User.Id;
+
+                await _context.MessageProjections.AddAsync(mp, cancellationToken);
+
+                if (!mp.IsInbound)
                 {
-                    ChannelId = request.ChannelId,
-                    MessageId = message.Id,
-                    Body = message.Body,
-                    Meta = message.Meta,
-                    PriorityId = message.PriorityId,
-                    Reactions = "{}",
-                    BodyTypeId = messageBodyType.Id,
-                    RecipientId = recipient.UserId,
-                    IsInbound = recipient.UserId != request.User.Id,
-                    SenderId = request.User.Id,
-                    SenderName = request.User.Username,
-                }, cancellationToken);
+                    senderMessageProjection = _mapper.Map<MessageProjectionDto>(mp);
+                }
             }
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -102,7 +105,7 @@ public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand,
 
             // TODO: queue expiration date
             await transaction.CommitAsync(cancellationToken);
-            return _mapper.Map<MessageBriefDto>(message);
+            return senderMessageProjection;
         }
         catch
         {

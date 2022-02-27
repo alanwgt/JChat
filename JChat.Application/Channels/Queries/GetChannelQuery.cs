@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using JChat.Application.Messages.Queries;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Dtos;
 using JChat.Application.Shared.Exceptions;
@@ -53,7 +54,10 @@ public class GetChannelQueryHandler : IRequestHandler<GetChannelQuery, ChannelDe
             .Where(mp =>
                 mp.RecipientId == null || mp.RecipientId == request.User.Id ||
                 mp.IsInbound == false && mp.SenderId == request.User.Id)
+            .ProjectTo<MessageProjectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        messages.Reverse();
 
         return new ChannelDetailedDto
         {

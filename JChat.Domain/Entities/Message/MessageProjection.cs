@@ -47,6 +47,8 @@ public class MessageProjection : IEntity<Guid>
             Meta = message.Meta,
             BodyTypeId = message.BodyTypeId,
             SenderId = sender.Id,
-            SenderName = sender.Username
+            SenderName = sender.Username,
+            Reactions = "{}",
+            CreatedAt = DateTime.UtcNow.ToUniversalTime(),
         };
 }

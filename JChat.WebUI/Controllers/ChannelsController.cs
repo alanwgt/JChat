@@ -46,7 +46,7 @@ public class ChannelsController : ApiController
     }
 
     [HttpPost("{channelId:guid}/messages")]
-    public async Task<ActionResult<MessageBriefDto>> SendMessage(CreateMessageCommand command, Guid channelId)
+    public async Task<ActionResult<MessageProjectionDto>> SendMessage(CreateMessageCommand command, Guid channelId)
     {
         command.ChannelId = channelId;
         return Ok(await Mediator.Send(command));

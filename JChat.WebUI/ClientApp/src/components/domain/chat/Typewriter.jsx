@@ -1,11 +1,16 @@
 import React from 'react';
 
-import { styled, useStyletron } from 'baseui';
+import { styled } from 'baseui';
 import { Button, SIZE as ButtonSize, KIND, SHAPE } from 'baseui/button';
 import { Input, SIZE } from 'baseui/input';
 import { useTranslation } from 'react-i18next';
 
+import { CreateMessageCommand } from '@/api/web-api-client';
+import Icon from '@/components/typography/Icon';
 import SendIcon from '@/components/typography/icons/SendIcon';
+import MessageBodyType from '@/constants/messageBodyType';
+import MessagePriority from '@/constants/messagePriority';
+import { selectGif } from '@/utils/input.utils';
 
 const TypewriterContainer = styled('div', ({ $theme }) => ({
   backgroundColor: $theme.colors.b3,
@@ -19,9 +24,32 @@ const TypewriterContainer = styled('div', ({ $theme }) => ({
 const Typewriter = ({ isLoading, onSubmit, ...props }) => {
   const [inputText, setInputText] = React.useState('');
   const { t } = useTranslation();
-  const [css] = useStyletron();
 
   const canSendMessage = () => !!inputText && !!inputText.trim().length;
+  const sendMessage = (bodyTypeId, priorityId, meta = '') => {
+    if (bodyTypeId === MessageBodyType.Text && !canSendMessage()) {
+      return;
+    }
+
+    const command = new CreateMessageCommand({
+      body: inputText,
+      bodyType: bodyTypeId,
+      priority: priorityId,
+      meta,
+    });
+
+    Promise.resolve(onSubmit(command)).then(() => {
+      setInputText('');
+    });
+  };
+
+  const onKeyDown = (evt) => {
+    if (evt.key !== 'Enter') {
+      return;
+    }
+
+    sendMessage();
+  };
 
   return (
     <TypewriterContainer {...props}>
@@ -30,6 +58,7 @@ const Typewriter = ({ isLoading, onSubmit, ...props }) => {
         size={SIZE.mini}
         placeholder={t('typewriter.placeholder')}
         value={inputText}
+        onKeyDown={onKeyDown}
         onChange={({ currentTarget: { value } }) => {
           setInputText(value);
         }}
@@ -42,34 +71,35 @@ const Typewriter = ({ isLoading, onSubmit, ...props }) => {
         }}
       />
       <Button
-        disabled={isLoading || !canSendMessage()}
         isLoading={isLoading}
         size={ButtonSize.compact}
         shape={SHAPE.pill}
         kind={KIND.tertiary}
         onClick={() => {
-          if (!canSendMessage()) {
-            return;
-          }
-
-          Promise.resolve(onSubmit(inputText)).then(() => {
-            setInputText('');
-          });
+          sendMessage(MessageBodyType.Text, MessagePriority.Normal);
         }}
       >
         <SendIcon />
       </Button>
-      {/*<div*/}
-      {/*  className={css({*/}
-      {/*    borderBottomLeftRadius: '5px',*/}
-      {/*    borderBottomRightRadius: '5px',*/}
-      {/*    border: '1px solid rgba(153, 153, 153, 0.4)',*/}
-      {/*    borderTop: 'none',*/}
-      {/*    padding: THEME.inputPadding,*/}
-      {/*  })}*/}
-      {/*>*/}
-      {/*  test*/}
-      {/*</div>*/}
+      <Button
+        isLoading={isLoading}
+        size={ButtonSize.compact}
+        shape={SHAPE.pill}
+        kind={KIND.tertiary}
+        onClick={() => {
+          selectGif()
+            .then((gif) => {
+              sendMessage(
+                MessageBodyType.Gif,
+                MessagePriority.Normal,
+                JSON.stringify(gif)
+              );
+            })
+            .catch(() => {});
+        }}
+      >
+        <Icon name='dev' />
+      </Button>
     </TypewriterContainer>
   );
 };

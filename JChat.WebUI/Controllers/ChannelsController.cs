@@ -2,6 +2,7 @@ using JChat.Application.Channels.Commands;
 using JChat.Application.Channels.Queries;
 using JChat.Application.Extensions;
 using JChat.Application.Messages.Commands;
+using JChat.Application.Messages.Queries;
 using JChat.Application.Shared.CQRS;
 using JChat.Application.Shared.Models;
 using JChat.WebUI.Controllers.SeedWork;
@@ -18,6 +19,10 @@ public class ChannelsController : ApiController
     [HttpGet]
     public async Task<ActionResult<PaginatedList<ChannelBriefDto>>> List([FromQuery] PaginationData data)
         => Ok(await Mediator.Send(new GetChannelsQuery().WithPaginationData(data)));
+
+    [HttpDelete("{channelId:guid}")]
+    public async Task<IActionResult> Delete(Guid channelId)
+        => Ok(await Mediator.Send(new DeleteChannelCommand { ChannelId = channelId }));
 
     [HttpGet("{channelId:guid}")]
     public async Task<ActionResult<ChannelDetailedDto>> GetChannelDetails(Guid channelId)

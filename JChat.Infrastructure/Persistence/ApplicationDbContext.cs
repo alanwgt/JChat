@@ -52,24 +52,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
-        foreach (var entry in ChangeTracker.Entries<Entity>())
-        {
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    entry.Entity.CreatedAt = _dateTime.Now;
-                    break;
-
-                case EntityState.Modified:
-                    entry.Entity.UpdatedAt = _dateTime.Now;
-                    break;
-
-                case EntityState.Deleted:
-                    entry.Entity.DeletedAt = _dateTime.Now;
-                    break;
-            }
-        }
-
         foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
         {
             switch (entry.State)
@@ -87,6 +69,31 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 case EntityState.Deleted:
                     entry.Entity.DeletedAt = _dateTime.Now;
                     entry.Entity.DeletedById = _currentUserService.User?.Id;
+                    entry.State = EntityState.Modified;
+                    break;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<Entity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = _dateTime.Now;
+                    break;
+
+                case EntityState.Modified:
+                    // when an auditable entity is deleted, it's marked as modified
+                    if (entry.Entity.DeletedAt == null)
+                    {
+                        entry.Entity.UpdatedAt = _dateTime.Now;
+                    }
+
+                    break;
+
+                case EntityState.Deleted:
+                    entry.State = EntityState.Modified;
+                    entry.Entity.DeletedAt = _dateTime.Now;
                     break;
             }
         }

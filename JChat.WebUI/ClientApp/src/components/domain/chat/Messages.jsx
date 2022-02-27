@@ -1,21 +1,30 @@
-import React from 'react';
+import React, { useRef } from 'react';
+
+import { useStyletron } from 'baseui';
 
 import Message from '@/components/domain/chat/Message';
-import { useStyletron } from 'baseui';
 
 const Messages = ({ messages, ...props }) => {
   const [css] = useStyletron();
+  const ref = useRef();
+
+  React.useEffect(() => {
+    ref.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
 
   return (
     <div
-      className={css({
-        paddingBottom: '8px',
-      })}
       {...props}
+      className={css({
+        flex: 1,
+        overflowY: 'auto',
+        paddingBottom: '15px',
+      })}
     >
       {messages.map((m) => (
-        <Message key={m.id}>{m.body}</Message>
+        <Message key={m.id} message={m} />
       ))}
+      <span ref={ref} className={css({ display: 'hidden' })} />
     </div>
   );
 };

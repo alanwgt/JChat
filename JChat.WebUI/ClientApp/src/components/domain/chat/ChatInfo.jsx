@@ -11,10 +11,11 @@ import UserStatus from '@/components/domain/chat/UserStatus';
 import GlobalUserFinderModal from '@/components/domain/user/GlobalUserFinderModal';
 import Icon from '@/components/typography/Icon';
 import { usePermissions } from '@/providers/permissionsContext';
-import feedbackUtils from '@/utils/feedback.utils';
+import feedbackUtils, { confirm } from '@/utils/feedback.utils';
 
 const MenuActionType = {
   InviteToChannel: 1,
+  DeleteChannel: 2,
 };
 
 const StyledContainer = styled('div', ({ $theme }) => ({
@@ -36,8 +37,12 @@ const ChatInfo = ({ name, channelId, ...props }) => {
 
   if (canManageChannel) {
     menuActions.push({
-      label: t('channels.add-member'),
+      label: t('channels.action.add-member'),
       action: MenuActionType.InviteToChannel,
+    });
+    menuActions.push({
+      label: t('channels.action.delete'),
+      action: MenuActionType.DeleteChannel,
     });
   }
 
@@ -76,6 +81,17 @@ const ChatInfo = ({ name, channelId, ...props }) => {
                   case MenuActionType.InviteToChannel:
                     setFinderIsOpen(true);
                     break;
+                  case MenuActionType.DeleteChannel:
+                    confirm(
+                      t('channels.action.delete.title'),
+                      t('channels.action.delete.description')
+                    )
+                      .then(() => {
+                        Channels.delete(channelId).then(() => {
+                          feedbackUtils.success(t('channels.action.deleted'));
+                        });
+                      })
+                      .catch(() => {});
                 }
                 close();
               }}

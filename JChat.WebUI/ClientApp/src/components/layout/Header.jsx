@@ -41,25 +41,25 @@ const Header = ({ isStarredMessagesBarOpen, toggleStarredMessagesBar }) => {
         >
           <Logo width='16px' />
         </div>
-        <div
-          className={css({
-            width: '400px',
-          })}
-        >
-          <Input
-            size={SIZE.compact}
-            placeholder={t('global-search-placeholder')}
-          />
-        </div>
+        {/*<div*/}
+        {/*  className={css({*/}
+        {/*    width: '400px',*/}
+        {/*  })}*/}
+        {/*>*/}
+        {/*  <Input*/}
+        {/*    size={SIZE.compact}*/}
+        {/*    placeholder={t('global-search-placeholder')}*/}
+        {/*  />*/}
+        {/*</div>*/}
         <div>
           <NotificationsToggle />
-          <Button
-            kind={KIND.tertiary}
-            size={ButtonSize.compact}
-            onClick={() => toggleStarredMessagesBar()}
-          >
-            <Icon name={isStarredMessagesBarOpen ? 'star-filled' : 'star'} />
-          </Button>
+          {/*<Button*/}
+          {/*  kind={KIND.tertiary}*/}
+          {/*  size={ButtonSize.compact}*/}
+          {/*  onClick={() => toggleStarredMessagesBar()}*/}
+          {/*>*/}
+          {/*  <Icon name={isStarredMessagesBarOpen ? 'star-filled' : 'star'} />*/}
+          {/*</Button>*/}
           <UserMenu />
         </div>
       </Container>

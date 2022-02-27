@@ -1,29 +1,31 @@
 import React from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { matchPath, useLocation } from 'react-router-dom';
 
 import ChannelListContainer from '@/components/domain/chat/ChannelListContainer';
 import CreateChannelModal from '@/components/domain/chat/CreateChannelModal';
 import DirectMessage from '@/components/domain/chat/DirectMessage';
-import { channelsSelector } from '@/store/boot/boot.selectors';
+import { addChatChannel } from '@/store/chat/chat.actions';
+import { channelsSelector } from '@/store/chat/chat.selectors';
 import feedbackUtils from '@/utils/feedback.utils';
 
 const Explorer = ({ ...props }) => {
-  const channels = useSelector(channelsSelector);
   const [modalIsOpen, setModalIsOpen] = React.useState(false);
   const { pathname } = useLocation();
   const { t } = useTranslation();
+  const channels = useSelector(channelsSelector);
+  const dispatch = useDispatch();
+
   const {
     params: { channelId },
   } = matchPath('/channels/:channelId', pathname) || { params: {} };
-  console.log(channels);
 
   const onCreate = (channel) => {
     feedbackUtils.positive(t('channels.created.message'));
     setModalIsOpen(false);
-    // setChannels([channel, ...channels]);
+    dispatch(addChatChannel(channel, true));
   };
 
   return (

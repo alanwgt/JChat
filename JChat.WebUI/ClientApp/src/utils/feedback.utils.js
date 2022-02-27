@@ -1,10 +1,35 @@
+import React from 'react';
+
 import { PLACEMENT, toaster } from 'baseui/toast';
+import ReactDOM from 'react-dom';
+
+import StylingEngine from '@/StylingEngine';
+import ConfirmModal from '@/components/data-entry/ConfirmModal';
 import i18n from '@/i18n';
+
+const dataEl = document.getElementById('data');
 
 const toastConfig = {
   autoHideDuration: 3000,
   placement: PLACEMENT.topRight,
 };
+
+export const confirm = (title, description) =>
+  new Promise((resolve, reject) => {
+    ReactDOM.render(
+      <StylingEngine>
+        <ConfirmModal
+          title={title}
+          description={description}
+          onConfirm={resolve}
+          onCancel={reject}
+        />
+      </StylingEngine>,
+      dataEl
+    );
+  }).finally(() => {
+    ReactDOM.unmountComponentAtNode(dataEl);
+  });
 
 export default {
   positive: (children, props = {}) =>
@@ -33,6 +58,8 @@ export default {
     if (children instanceof Error) {
       if (children.i18nKey) {
         message = i18n.t(children.i18nKey);
+      } else if (children.title) {
+        message = children.title;
       } else {
         message = children.message;
       }

@@ -37,6 +37,7 @@ const FormInput = ({
         rules={rules}
         name={name}
         value={value}
+        defaultValue=''
       />
     </FormControl>
   );

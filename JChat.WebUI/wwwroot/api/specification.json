@@ -1,5 +1,5 @@
 {
-  "x-generator": "NSwag v13.15.5.0 (NJsonSchema v10.6.6.0 (Newtonsoft.Json v12.0.0.0))",
+  "x-generator": "NSwag v13.15.9.0 (NJsonSchema v10.6.8.0 (Newtonsoft.Json v12.0.0.0))",
   "openapi": "3.0.0",
   "info": {
     "title": "JChat",
@@ -97,6 +97,37 @@
       }
     },
     "/channels/{channelId}": {
+      "delete": {
+        "tags": [
+          "Channels"
+        ],
+        "operationId": "Channels_Delete",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "Channels"
@@ -310,7 +341,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageBriefDto"
+                  "$ref": "#/components/schemas/MessageProjectionDto"
                 }
               }
             }
@@ -329,7 +360,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User2"
+                "$ref": "#/components/schemas/User"
               }
             }
           },
@@ -920,12 +951,12 @@
           "messages": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MessageProjection"
+              "$ref": "#/components/schemas/MessageProjectionDto"
             }
           }
         }
       },
-      "MessageProjection": {
+      "MessageProjectionDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -933,34 +964,19 @@
             "type": "string",
             "format": "guid"
           },
-          "channelId": {
+          "messageId": {
             "type": "string",
             "format": "guid"
           },
           "recipientId": {
             "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "messageId": {
-            "type": "string",
             "format": "guid"
-          },
-          "priorityId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "replyingToId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "forwardedById": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
           },
           "senderId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "channelId": {
             "type": "string",
             "format": "guid"
           },
@@ -975,13 +991,6 @@
           },
           "meta": {
             "type": "string"
-          },
-          "bodyTypeId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "priority": {
-            "$ref": "#/components/schemas/MessagePriority"
           },
           "reactions": {
             "type": "string"
@@ -1005,507 +1014,24 @@
             "format": "date-time",
             "nullable": true
           },
-          "channel": {
-            "$ref": "#/components/schemas/Channel"
-          },
-          "sender": {
-            "$ref": "#/components/schemas/User"
-          },
-          "recipient": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              }
-            ]
-          },
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
           "replyingTo": {
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/Message"
+                "$ref": "#/components/schemas/MessageProjectionDto"
               }
             ]
           },
           "forwardedBy": {
-            "$ref": "#/components/schemas/User"
+            "$ref": "#/components/schemas/UserBriefDto"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/IdNameDto"
           },
           "bodyType": {
-            "$ref": "#/components/schemas/MessageBodyType"
+            "$ref": "#/components/schemas/IdNameDto"
           }
         }
-      },
-      "MessagePriority": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "Entity": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "deletedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "Channel": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "workspaceId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "name": {
-                "type": "string"
-              },
-              "isPrivate": {
-                "type": "boolean"
-              },
-              "workspace": {
-                "$ref": "#/components/schemas/Workspace"
-              },
-              "users": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ChannelUser"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "Workspace": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "userWorkspaces": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/UserWorkspace"
-                }
-              },
-              "channels": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Channel"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "UserWorkspace": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "workspaceId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "userId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "admin": {
-                "type": "boolean"
-              },
-              "banishmentReason": {
-                "type": "string",
-                "nullable": true
-              },
-              "banishedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "acceptedAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "rejectedAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "workspace": {
-                "$ref": "#/components/schemas/Workspace"
-              },
-              "user": {
-                "$ref": "#/components/schemas/User"
-              },
-              "banishedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "User": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "username": {
-                "type": "string"
-              },
-              "firstname": {
-                "type": "string"
-              },
-              "lastname": {
-                "type": "string"
-              },
-              "channels": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ChannelUser"
-                }
-              },
-              "userWorkspaces": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/UserWorkspace"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "ChannelUser": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "channelId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "userId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "isAdmin": {
-                "type": "boolean"
-              },
-              "channel": {
-                "$ref": "#/components/schemas/Channel"
-              },
-              "user": {
-                "$ref": "#/components/schemas/User"
-              }
-            }
-          }
-        ]
-      },
-      "AuditableEntity": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "x-abstract": true,
-            "additionalProperties": false,
-            "properties": {
-              "createdById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "lastModifiedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "deletedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "createdBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              },
-              "lastModifiedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              },
-              "deletedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/User"
-                  }
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "Message": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "bodyTypeId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "priorityId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "replyingToId": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "messageBodyTypeId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "body": {
-                "type": "string"
-              },
-              "meta": {
-                "type": "string"
-              },
-              "expirationDate": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "replyingTo": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/Message"
-                  }
-                ]
-              },
-              "bodyType": {
-                "$ref": "#/components/schemas/MessageBodyType"
-              },
-              "priority": {
-                "$ref": "#/components/schemas/MessagePriority"
-              },
-              "reactions": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MessageReaction"
-                }
-              },
-              "recipients": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MessageRecipient"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "MessageBodyType": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "MessageReaction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "messageId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "reactionId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "message": {
-                "$ref": "#/components/schemas/Message"
-              },
-              "reaction": {
-                "$ref": "#/components/schemas/Reaction"
-              }
-            }
-          }
-        ]
-      },
-      "Reaction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "icon": {
-                "type": "string"
-              },
-              "color": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "MessageRecipient": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "recipientId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "messageId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "channelId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "forwardedById": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "receivedAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "readAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "confirmedVisualizationAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "recipient": {
-                "$ref": "#/components/schemas/User"
-              },
-              "forwardedBy": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/MessageRecipient"
-                  }
-                ]
-              },
-              "message": {
-                "$ref": "#/components/schemas/Message"
-              },
-              "channel": {
-                "$ref": "#/components/schemas/Channel"
-              }
-            }
-          }
-        ]
       },
       "PaginatedListOfChannelUserBriefDto": {
         "type": "object",
@@ -1558,6 +1084,23 @@
       "AddUserToChannelCommand": {
         "allOf": [
           {
+            "$ref": "#/components/schemas/ChannelScopedRequestOfChannelUserBriefDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "userId": {
+                "type": "string",
+                "format": "guid"
+              }
+            }
+          }
+        ]
+      },
+      "ChannelScopedRequestOfChannelUserBriefDto": {
+        "allOf": [
+          {
             "$ref": "#/components/schemas/WorkspaceScopedRequestOfChannelUserBriefDto"
           },
           {
@@ -1565,10 +1108,6 @@
             "additionalProperties": false,
             "properties": {
               "channelId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "userId": {
                 "type": "string",
                 "format": "guid"
               }
@@ -1626,14 +1165,10 @@
           }
         ]
       },
-      "MessageBriefDto": {
-        "type": "object",
-        "additionalProperties": false
-      },
       "CreateMessageCommand": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ChannelScopedRequestOfMessageBriefDto"
+            "$ref": "#/components/schemas/ChannelScopedRequestOfMessageProjectionDto"
           },
           {
             "type": "object",
@@ -1650,6 +1185,9 @@
                 "type": "string",
                 "format": "guid"
               },
+              "meta": {
+                "type": "string"
+              },
               "expirationDate": {
                 "type": "string",
                 "format": "date-time",
@@ -1659,10 +1197,10 @@
           }
         ]
       },
-      "ChannelScopedRequestOfMessageBriefDto": {
+      "ChannelScopedRequestOfMessageProjectionDto": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/WorkspaceScopedRequestOfMessageBriefDto"
+            "$ref": "#/components/schemas/WorkspaceScopedRequestOfMessageProjectionDto"
           },
           {
             "type": "object",
@@ -1676,10 +1214,10 @@
           }
         ]
       },
-      "WorkspaceScopedRequestOfMessageBriefDto": {
+      "WorkspaceScopedRequestOfMessageProjectionDto": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/BaseRequestOfMessageBriefDto"
+            "$ref": "#/components/schemas/BaseRequestOfMessageProjectionDto"
           },
           {
             "type": "object",
@@ -1693,7 +1231,7 @@
           }
         ]
       },
-      "BaseRequestOfMessageBriefDto": {
+      "BaseRequestOfMessageProjectionDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -1702,7 +1240,7 @@
           }
         }
       },
-      "User2": {
+      "User": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -1785,14 +1323,12 @@
         "x-enumNames": [
           "WorkspaceInvitation",
           "UserJoinedWorkspace",
-          "UserJoinedChannel",
-          "NewMessage"
+          "UserJoinedChannel"
         ],
         "enum": [
           0,
           1,
-          2,
-          3
+          2
         ]
       },
       "PaginatedListOfUserBriefDto": {

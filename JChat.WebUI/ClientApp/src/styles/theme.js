@@ -61,7 +61,7 @@ THEME.clickable = {
   },
 };
 
-THEME.incomingMessage = {
+THEME.inboundMessage = {
   border: `1px solid ${THEME.colors.neutralDark}22`,
   backgroundColor: THEME.colors.neutralPrimaryAlt,
 };
@@ -73,6 +73,7 @@ THEME.outgoingMessage = {
 
 THEME.colors.neutralPrimaryAlpha = `${THEME.colors.neutralPrimary}77`;
 THEME.colors.neutralDarkAlpha = `${THEME.colors.neutralDark}D9`;
+THEME.colors.chatBackground = THEME.colors.b2;
 
 // https://baseweb.design/guides/theming/
 const baseUiPrimitives = {

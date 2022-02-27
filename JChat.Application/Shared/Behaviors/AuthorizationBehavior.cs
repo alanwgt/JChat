@@ -10,7 +10,7 @@ using ApplicationException = JChat.Application.Shared.Exceptions.ApplicationExce
 namespace JChat.Application.Shared.Behaviors;
 
 public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : IRequest<TResponse>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<AuthorizationBehavior<TRequest, TResponse>> _logger;

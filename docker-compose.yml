@@ -65,8 +65,6 @@ services:
       LOG_LEAK_SENSITIVE_VALUES: $DEBUG
       SECRETS_COOKIE: "-7593%ZSqRK=Su7XE*!5+LnjpkC8T$v+LpwyN%%2&zbp52bdxBnGRmReXULP7vyd"
       SECRETS_CIPHER: "_W%@JEcw*F^P4Cvk48rtPjjVbgJM*r_g"
-    ports:
-      - 4434:4434
     volumes:
       - type: bind
         source: ./JChat.Infrastructure/Files/kratos
